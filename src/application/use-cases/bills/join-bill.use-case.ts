@@ -33,7 +33,7 @@ export class JoinBillByCodeUseCase {
       throw new NotFoundException('Usuário não encontrado');
     }
 
-    const participant = new Participant(userId, user.name, new Date());
+    const participant = new Participant(userId, user.name, false, new Date()); // não é visitante
 
     await this.billRepository.addParticipant(bill.id, participant);
   }

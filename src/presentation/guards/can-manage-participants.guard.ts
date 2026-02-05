@@ -41,7 +41,7 @@ export class CanManageParticipantsGuard implements CanActivate {
         (p) => p.userId === participantId || p.name === participantId,
       );
 
-      if (participant && participant.userId) {
+      if (participant && !participant.isVisitor) {
         throw new ForbiddenException(
           'Você só pode remover participantes visitantes',
         );

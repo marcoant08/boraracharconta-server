@@ -16,7 +16,8 @@ export class AddParticipantToBillUseCase {
       throw new NotFoundException('Conta não encontrada');
     }
 
-    const participant = new Participant(undefined, name, new Date());
+    // Para visitantes, userId é igual ao name
+    const participant = new Participant(name, name, true, new Date()); // é visitante
 
     await this.billRepository.addParticipant(billId, participant);
   }

@@ -1,15 +1,13 @@
 export class Participant {
-  userId?: string;
+  userId: string;
   name: string;
+  isVisitor: boolean;
   joinedAt: Date;
 
-  constructor(userId: string | undefined, name: string, joinedAt: Date) {
+  constructor(userId: string, name: string, isVisitor: boolean, joinedAt: Date) {
     this.userId = userId;
     this.name = name;
+    this.isVisitor = isVisitor;
     this.joinedAt = joinedAt;
-  }
-
-  isVisitor(): boolean {
-    return !this.userId;
   }
 }

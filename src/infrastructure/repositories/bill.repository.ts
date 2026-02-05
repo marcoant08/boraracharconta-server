@@ -22,6 +22,7 @@ export class BillRepository implements IBillRepository {
       participants: bill.participants.map(p => ({
         userId: p.userId,
         name: p.name,
+        isVisitor: p.isVisitor,
         joinedAt: p.joinedAt,
       })),
       items: bill.items.map(i => ({
@@ -59,7 +60,12 @@ export class BillRepository implements IBillRepository {
           code: bill.code,
           adminId: bill.adminId,
           name: bill.name,
-          participants: bill.participants,
+          participants: bill.participants.map(p => ({
+            userId: p.userId,
+            name: p.name,
+            isVisitor: p.isVisitor,
+            joinedAt: p.joinedAt,
+          })),
           items: bill.items,
           consumptions: bill.consumptions,
         },
@@ -153,6 +159,7 @@ export class BillRepository implements IBillRepository {
         participants: {
           userId: participant.userId,
           name: participant.name,
+          isVisitor: participant.isVisitor,
           joinedAt: participant.joinedAt,
         },
       },
@@ -170,21 +177,17 @@ export class BillRepository implements IBillRepository {
 
     if (!participant) return;
 
-    const identifier = participant.userId || participant.name;
-
-    // Remover participante
+    // Remover participante (userId sempre existe agora)
     await this.billModel.findByIdAndUpdate(billId, {
       $pull: {
-        participants: participant.userId
-          ? { userId: participant.userId }
-          : { name: participant.name },
+        participants: { userId: participant.userId },
       },
     }).exec();
 
     // Remover consumptions relacionados
     await this.billModel.findByIdAndUpdate(billId, {
       $pull: {
-        consumptions: { participantId: identifier },
+        consumptions: { participantId: participant.userId },
       },
     }).exec();
   }
@@ -195,7 +198,12 @@ export class BillRepository implements IBillRepository {
       bill.code,
       bill.adminId,
       bill.name,
-      bill.participants.map(p => new Participant(p.userId, p.name, p.joinedAt)),
+      bill.participants.map(p => {
+        // Migração: se userId não existir (dados antigos), usar name como userId e marcar como visitante
+        const userId = p.userId ?? p.name;
+        const isVisitor = p.isVisitor ?? (p.userId === undefined);
+        return new Participant(userId, p.name, isVisitor, p.joinedAt);
+      }),
       bill.items.map(i => new BillItem(i.id, i.name, i.value, i.quantity, i.category)),
       bill.consumptions.map(c => new Consumption(c.participantId, c.itemId, c.quantity)),
       (bill as any).createdAt || new Date(),

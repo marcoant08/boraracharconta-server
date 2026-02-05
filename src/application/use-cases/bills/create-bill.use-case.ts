@@ -26,6 +26,7 @@ export class CreateBillUseCase {
     const adminParticipant = new Participant(
       adminId,
       user.name,
+      false, // não é visitante
       new Date(),
     );
 

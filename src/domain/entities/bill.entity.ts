@@ -45,7 +45,7 @@ export class Bill {
 
   isVerifiedParticipant(userId: string): boolean {
     return this.participants.some(
-      (p) => p.userId === userId && !p.isVisitor(),
+      (p) => p.userId === userId && !p.isVisitor,
     );
   }
 }

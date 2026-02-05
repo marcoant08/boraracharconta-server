@@ -41,7 +41,7 @@ export class RemoveParticipantFromBillUseCase {
     }
 
     // Se não for admin, só pode remover visitantes
-    if (!isAdmin && participant.userId) {
+    if (!isAdmin && !participant.isVisitor) {
       throw new ForbiddenException(
         'Você só pode remover participantes visitantes',
       );
