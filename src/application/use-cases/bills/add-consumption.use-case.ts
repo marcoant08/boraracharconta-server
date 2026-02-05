@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, Inject } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Inject } from '@nestjs/common';
 import { IBillRepository } from '@domain/repositories/bill.repository.interface';
 import { Consumption } from '@domain/entities/consumption.entity';
 
@@ -33,6 +33,16 @@ export class AddConsumptionUseCase {
     );
     if (!participantExists) {
       throw new NotFoundException('Participante não encontrado');
+    }
+
+    // Verificar se já existe um consumo com os mesmos itemId e participantId
+    const consumptionExists = bill.consumptions.some(
+      (c) => c.itemId === itemId && c.participantId === participantId,
+    );
+    if (consumptionExists) {
+      throw new BadRequestException(
+        'Já existe um consumo para este participante e item. Use a atualização para modificar a quantidade.',
+      );
     }
 
     const consumption = new Consumption(participantId, itemId, quantity);
