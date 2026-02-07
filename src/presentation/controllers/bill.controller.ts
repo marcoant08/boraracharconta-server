@@ -77,8 +77,8 @@ export class BillController {
   @ApiOperation({ summary: 'Entrar na conta via código' })
   @ApiResponse({ status: 200, description: 'Entrou na conta com sucesso' })
   async joinBill(@Body() joinBillDto: JoinBillDto, @Request() req) {
-    await this.joinBillByCodeUseCase.execute(joinBillDto.code, req.user.userId);
-    return { message: 'Entrou na conta com sucesso' };
+    const billId = await this.joinBillByCodeUseCase.execute(joinBillDto.code, req.user.userId);
+    return { billId, message: 'Entrou na conta com sucesso' };
   }
 
   @Get(':billId')

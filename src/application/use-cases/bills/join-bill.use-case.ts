@@ -14,7 +14,7 @@ export class JoinBillByCodeUseCase {
     private readonly billEventsService: BillEventsService,
   ) {}
 
-  async execute(code: string, userId: string): Promise<void> {
+  async execute(code: string, userId: string): Promise<string> {
     const bill = await this.billRepository.findByCode(code);
 
     if (!bill) {
@@ -27,7 +27,7 @@ export class JoinBillByCodeUseCase {
     );
 
     if (isAlreadyParticipant) {
-      return;
+      return bill.id;
     }
 
     const user = await this.userRepository.findById(userId);
@@ -41,5 +41,7 @@ export class JoinBillByCodeUseCase {
 
     // Emitir evento WebSocket para notificar outros participantes
     await this.billEventsService.emitParticipantAdded(bill.id);
+
+    return bill.id;
   }
 }
