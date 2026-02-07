@@ -7,6 +7,7 @@ export interface IBillRepository {
   create(bill: Bill): Promise<Bill>;
   findById(id: string): Promise<Bill | null>;
   findByCode(code: string): Promise<Bill | null>;
+  findByUserId(userId: string): Promise<Bill[]>;
   update(bill: Bill): Promise<Bill>;
   delete(id: string): Promise<void>;
 

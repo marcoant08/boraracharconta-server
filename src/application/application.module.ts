@@ -9,6 +9,7 @@ import { ResendVerificationCodeUseCase } from './use-cases/auth/resend-verificat
 import { CreateBillUseCase } from './use-cases/bills/create-bill.use-case';
 import { JoinBillByCodeUseCase } from './use-cases/bills/join-bill.use-case';
 import { GetBillUseCase } from './use-cases/bills/get-bill.use-case';
+import { ListUserBillsUseCase } from './use-cases/bills/list-user-bills.use-case';
 import { AddParticipantToBillUseCase } from './use-cases/bills/add-participant.use-case';
 import { RemoveParticipantFromBillUseCase } from './use-cases/bills/remove-participant.use-case';
 import { AddItemToBillUseCase } from './use-cases/bills/add-item.use-case';
@@ -27,6 +28,7 @@ import { RemoveConsumptionUseCase } from './use-cases/bills/remove-consumption.u
     CreateBillUseCase,
     JoinBillByCodeUseCase,
     GetBillUseCase,
+    ListUserBillsUseCase,
     AddParticipantToBillUseCase,
     RemoveParticipantFromBillUseCase,
     AddItemToBillUseCase,
@@ -43,6 +45,7 @@ import { RemoveConsumptionUseCase } from './use-cases/bills/remove-consumption.u
     CreateBillUseCase,
     JoinBillByCodeUseCase,
     GetBillUseCase,
+    ListUserBillsUseCase,
     AddParticipantToBillUseCase,
     RemoveParticipantFromBillUseCase,
     AddItemToBillUseCase,

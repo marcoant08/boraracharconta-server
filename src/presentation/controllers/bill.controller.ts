@@ -25,6 +25,7 @@ import { CanManageParticipantsGuard } from '../guards/can-manage-participants.gu
 import { CreateBillUseCase } from '@application/use-cases/bills/create-bill.use-case';
 import { JoinBillByCodeUseCase } from '@application/use-cases/bills/join-bill.use-case';
 import { GetBillUseCase } from '@application/use-cases/bills/get-bill.use-case';
+import { ListUserBillsUseCase } from '@application/use-cases/bills/list-user-bills.use-case';
 import { AddParticipantToBillUseCase } from '@application/use-cases/bills/add-participant.use-case';
 import { RemoveParticipantFromBillUseCase } from '@application/use-cases/bills/remove-participant.use-case';
 import { AddItemToBillUseCase } from '@application/use-cases/bills/add-item.use-case';
@@ -40,6 +41,7 @@ import { AddConsumptionDto } from '../dto/bills/add-consumption.dto';
 import { UpdateConsumptionDto } from '../dto/bills/update-consumption.dto';
 import { RemoveConsumptionDto } from '../dto/bills/remove-consumption.dto';
 import { BillResponseDto } from '../dto/bills/bill-response.dto';
+import { BillSummaryDto } from '../dto/bills/bill-summary.dto';
 import { Bill } from '@domain/entities/bill.entity';
 
 @ApiTags('bills')
@@ -51,6 +53,7 @@ export class BillController {
     private readonly createBillUseCase: CreateBillUseCase,
     private readonly joinBillByCodeUseCase: JoinBillByCodeUseCase,
     private readonly getBillUseCase: GetBillUseCase,
+    private readonly listUserBillsUseCase: ListUserBillsUseCase,
     private readonly addParticipantToBillUseCase: AddParticipantToBillUseCase,
     private readonly removeParticipantFromBillUseCase: RemoveParticipantFromBillUseCase,
     private readonly addItemToBillUseCase: AddItemToBillUseCase,
@@ -79,6 +82,18 @@ export class BillController {
   async joinBill(@Body() joinBillDto: JoinBillDto, @Request() req) {
     const billId = await this.joinBillByCodeUseCase.execute(joinBillDto.code, req.user.userId);
     return { billId, message: 'Entrou na conta com sucesso' };
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Listar todas as contas do usuário' })
+  @ApiResponse({ status: 200, description: 'Lista de contas', type: [BillSummaryDto] })
+  async listUserBills(@Request() req) {
+    const bills = await this.listUserBillsUseCase.execute(req.user.userId);
+    return bills.map(bill => ({
+      id: bill.id,
+      code: bill.code,
+      name: bill.name,
+    }));
   }
 
   @Get(':billId')

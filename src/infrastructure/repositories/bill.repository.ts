@@ -52,6 +52,21 @@ export class BillRepository implements IBillRepository {
     return bill ? this.toDomain(bill) : null;
   }
 
+  async findByUserId(userId: string): Promise<Bill[]> {
+    // Buscar bills onde o usuário é admin ou participante
+    const bills = await this.billModel
+      .find({
+        $or: [
+          { adminId: userId },
+          { 'participants.userId': userId },
+        ],
+      })
+      .sort({ updatedAt: -1 })
+      .exec();
+    
+    return bills.map(bill => this.toDomain(bill));
+  }
+
   async update(bill: Bill): Promise<Bill> {
     const updated = await this.billModel
       .findByIdAndUpdate(
