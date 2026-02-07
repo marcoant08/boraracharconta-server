@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { RepositoriesModule } from '@infrastructure/repositories/repositories.module';
 import { ServicesModule } from '@infrastructure/services/services.module';
+import { WebSocketModule } from '@presentation/websocket.module';
 import { RegisterUserUseCase } from './use-cases/auth/register-user.use-case';
 import { LoginUseCase } from './use-cases/auth/login.use-case';
 import { VerifyEmailUseCase } from './use-cases/auth/verify-email.use-case';
@@ -17,7 +18,7 @@ import { UpdateConsumptionUseCase } from './use-cases/bills/update-consumption.u
 import { RemoveConsumptionUseCase } from './use-cases/bills/remove-consumption.use-case';
 
 @Module({
-  imports: [RepositoriesModule, ServicesModule],
+  imports: [RepositoriesModule, ServicesModule, WebSocketModule],
   providers: [
     RegisterUserUseCase,
     LoginUseCase,

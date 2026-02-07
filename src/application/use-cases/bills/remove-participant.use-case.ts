@@ -5,12 +5,14 @@ import {
   Inject,
 } from '@nestjs/common';
 import { IBillRepository } from '@domain/repositories/bill.repository.interface';
+import { BillEventsService } from '@infrastructure/services/bill-events.service';
 
 @Injectable()
 export class RemoveParticipantFromBillUseCase {
   constructor(
     @Inject('IBillRepository')
     private readonly billRepository: IBillRepository,
+    private readonly billEventsService: BillEventsService,
   ) {}
 
   async execute(
@@ -48,5 +50,8 @@ export class RemoveParticipantFromBillUseCase {
     }
 
     await this.billRepository.removeParticipant(billId, participantId);
+
+    // Emitir evento WebSocket
+    await this.billEventsService.emitParticipantRemoved(billId);
   }
 }

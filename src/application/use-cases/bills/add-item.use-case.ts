@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { IBillRepository } from '@domain/repositories/bill.repository.interface';
 import { BillItem } from '@domain/entities/bill-item.entity';
+import { BillEventsService } from '@infrastructure/services/bill-events.service';
 import { randomUUID } from 'crypto';
 
 @Injectable()
@@ -8,6 +9,7 @@ export class AddItemToBillUseCase {
   constructor(
     @Inject('IBillRepository')
     private readonly billRepository: IBillRepository,
+    private readonly billEventsService: BillEventsService,
   ) {}
 
   async execute(
@@ -32,6 +34,9 @@ export class AddItemToBillUseCase {
     );
 
     await this.billRepository.addItem(billId, item);
+
+    // Emitir evento WebSocket
+    await this.billEventsService.emitItemAdded(billId);
 
     return item;
   }

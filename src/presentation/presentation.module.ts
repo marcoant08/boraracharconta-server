@@ -5,12 +5,14 @@ import { RepositoriesModule } from '@infrastructure/repositories/repositories.mo
 import { AuthController } from './controllers/auth.controller';
 import { BillController } from './controllers/bill.controller';
 import { JwtStrategy } from './guards/jwt.strategy';
+import { WebSocketModule } from './websocket.module';
 
 @Module({
   imports: [
     ApplicationModule,
     RepositoriesModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
+    WebSocketModule,
   ],
   controllers: [AuthController, BillController],
   providers: [JwtStrategy],
