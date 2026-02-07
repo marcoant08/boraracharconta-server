@@ -34,6 +34,11 @@ export class RemoveParticipantFromBillUseCase {
       throw new NotFoundException('Participante não encontrado');
     }
 
+    // Verificar se está tentando remover o admin
+    if (bill.adminId === participantId || bill.adminId === participant.userId) {
+      throw new ForbiddenException('Não é possível remover o administrador da conta');
+    }
+
     // Verificar autorização
     const isAdmin = bill.isAdmin(userId);
     const isVerifiedParticipant = bill.isVerifiedParticipant(userId);
