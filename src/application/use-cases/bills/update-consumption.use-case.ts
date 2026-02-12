@@ -39,6 +39,6 @@ export class UpdateConsumptionUseCase {
     );
 
     // Emitir evento WebSocket
-    await this.billEventsService.emitConsumptionUpdated(billId);
+    await this.billEventsService.emitConsumptionUpdated(billId, participantId, itemId, quantity);
   }
 }

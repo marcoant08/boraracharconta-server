@@ -52,6 +52,6 @@ export class AddConsumptionUseCase {
     await this.billRepository.addConsumption(billId, consumption);
 
     // Emitir evento WebSocket
-    await this.billEventsService.emitConsumptionAdded(billId);
+    await this.billEventsService.emitConsumptionAdded(billId, consumption);
   }
 }

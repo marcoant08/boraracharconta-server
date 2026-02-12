@@ -36,7 +36,7 @@ export class AddItemToBillUseCase {
     await this.billRepository.addItem(billId, item);
 
     // Emitir evento WebSocket
-    await this.billEventsService.emitItemAdded(billId);
+    await this.billEventsService.emitItemAdded(billId, item);
 
     return item;
   }

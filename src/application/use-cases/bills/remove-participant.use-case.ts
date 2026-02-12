@@ -57,6 +57,6 @@ export class RemoveParticipantFromBillUseCase {
     await this.billRepository.removeParticipant(billId, participantId);
 
     // Emitir evento WebSocket
-    await this.billEventsService.emitParticipantRemoved(billId);
+    await this.billEventsService.emitParticipantRemoved(billId, participantId);
   }
 }

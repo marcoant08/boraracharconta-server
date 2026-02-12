@@ -33,6 +33,6 @@ export class RemoveConsumptionUseCase {
     await this.billRepository.removeConsumption(billId, participantId, itemId);
 
     // Emitir evento WebSocket
-    await this.billEventsService.emitConsumptionRemoved(billId);
+    await this.billEventsService.emitConsumptionRemoved(billId, participantId, itemId);
   }
 }

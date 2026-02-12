@@ -26,6 +26,6 @@ export class DeleteItemFromBillUseCase {
     await this.billRepository.removeItem(billId, itemId);
 
     // Emitir evento WebSocket
-    await this.billEventsService.emitItemRemoved(billId);
+    await this.billEventsService.emitItemRemoved(billId, itemId);
   }
 }

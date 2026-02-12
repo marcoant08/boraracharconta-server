@@ -1,6 +1,9 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { IBillRepository } from '@domain/repositories/bill.repository.interface';
 import { BillGateway } from '@presentation/gateways/bill.gateway';
+import { BillItem } from '@domain/entities/bill-item.entity';
+import { Participant } from '@domain/value-objects/participant.vo';
+import { Consumption } from '@domain/entities/consumption.entity';
 
 @Injectable()
 export class BillEventsService {
@@ -23,31 +26,50 @@ export class BillEventsService {
     }
   }
 
-  async emitParticipantAdded(billId: string): Promise<void> {
-    await this.emitBillUpdated(billId);
+  async emitItemAdded(billId: string, item: BillItem): Promise<void> {
+    this.billGateway.emitItemAdded(billId, {
+      id: item.id,
+      name: item.name,
+      value: item.value,
+      quantity: item.quantity,
+      category: item.category,
+    });
   }
 
-  async emitParticipantRemoved(billId: string): Promise<void> {
-    await this.emitBillUpdated(billId);
+  async emitItemRemoved(billId: string, itemId: string): Promise<void> {
+    this.billGateway.emitItemRemoved(billId, itemId);
   }
 
-  async emitItemAdded(billId: string): Promise<void> {
-    await this.emitBillUpdated(billId);
+  async emitParticipantAdded(billId: string, participant: Participant): Promise<void> {
+    this.billGateway.emitParticipantAdded(billId, {
+      userId: participant.userId,
+      name: participant.name,
+      isVisitor: participant.isVisitor,
+      joinedAt: participant.joinedAt,
+    });
   }
 
-  async emitItemRemoved(billId: string): Promise<void> {
-    await this.emitBillUpdated(billId);
+  async emitParticipantRemoved(billId: string, participantId: string): Promise<void> {
+    this.billGateway.emitParticipantRemoved(billId, participantId);
   }
 
-  async emitConsumptionAdded(billId: string): Promise<void> {
-    await this.emitBillUpdated(billId);
+  async emitConsumptionAdded(billId: string, consumption: Consumption): Promise<void> {
+    this.billGateway.emitConsumptionAdded(billId, {
+      participantId: consumption.participantId,
+      itemId: consumption.itemId,
+      quantity: consumption.quantity,
+    });
   }
 
-  async emitConsumptionUpdated(billId: string): Promise<void> {
-    await this.emitBillUpdated(billId);
+  async emitConsumptionUpdated(billId: string, participantId: string, itemId: string, quantity: number): Promise<void> {
+    this.billGateway.emitConsumptionUpdated(billId, {
+      participantId,
+      itemId,
+      quantity,
+    });
   }
 
-  async emitConsumptionRemoved(billId: string): Promise<void> {
-    await this.emitBillUpdated(billId);
+  async emitConsumptionRemoved(billId: string, participantId: string, itemId: string): Promise<void> {
+    this.billGateway.emitConsumptionRemoved(billId, participantId, itemId);
   }
 }

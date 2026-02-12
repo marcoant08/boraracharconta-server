@@ -24,6 +24,6 @@ export class AddParticipantToBillUseCase {
     await this.billRepository.addParticipant(billId, participant);
 
     // Emitir evento WebSocket
-    await this.billEventsService.emitParticipantAdded(billId);
+    await this.billEventsService.emitParticipantAdded(billId, participant);
   }
 }

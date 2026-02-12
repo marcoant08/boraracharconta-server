@@ -40,7 +40,7 @@ export class JoinBillByCodeUseCase {
     await this.billRepository.addParticipant(bill.id, participant);
 
     // Emitir evento WebSocket para notificar outros participantes
-    await this.billEventsService.emitParticipantAdded(bill.id);
+    await this.billEventsService.emitParticipantAdded(bill.id, participant);
 
     return bill.id;
   }

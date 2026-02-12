@@ -192,4 +192,103 @@ export class BillGateway
 
     this.logger.log(`Bill update emitted to room ${room} (${socketsInRoom.length} sockets)`);
   }
+
+  /**
+   * Emite evento de item adicionado
+   */
+  emitItemAdded(billId: string, item: any): void {
+    const room = `bill:${billId}`;
+    this.server.to(room).emit('item-added', {
+      billId,
+      item,
+      action: 'added',
+      timestamp: new Date(),
+    });
+    this.logger.debug(`Item added event emitted to room ${room}`);
+  }
+
+  /**
+   * Emite evento de item removido
+   */
+  emitItemRemoved(billId: string, itemId: string): void {
+    const room = `bill:${billId}`;
+    this.server.to(room).emit('item-removed', {
+      billId,
+      itemId,
+      action: 'removed',
+      timestamp: new Date(),
+    });
+    this.logger.debug(`Item removed event emitted to room ${room}`);
+  }
+
+  /**
+   * Emite evento de participante adicionado
+   */
+  emitParticipantAdded(billId: string, participant: any): void {
+    const room = `bill:${billId}`;
+    this.server.to(room).emit('participant-added', {
+      billId,
+      participant,
+      action: 'added',
+      timestamp: new Date(),
+    });
+    this.logger.debug(`Participant added event emitted to room ${room}`);
+  }
+
+  /**
+   * Emite evento de participante removido
+   */
+  emitParticipantRemoved(billId: string, participantId: string): void {
+    const room = `bill:${billId}`;
+    this.server.to(room).emit('participant-removed', {
+      billId,
+      participantId,
+      action: 'removed',
+      timestamp: new Date(),
+    });
+    this.logger.debug(`Participant removed event emitted to room ${room}`);
+  }
+
+  /**
+   * Emite evento de consumo adicionado
+   */
+  emitConsumptionAdded(billId: string, consumption: any): void {
+    const room = `bill:${billId}`;
+    this.server.to(room).emit('consumption-added', {
+      billId,
+      consumption,
+      action: 'added',
+      timestamp: new Date(),
+    });
+    this.logger.debug(`Consumption added event emitted to room ${room}`);
+  }
+
+  /**
+   * Emite evento de consumo atualizado
+   */
+  emitConsumptionUpdated(billId: string, consumption: any): void {
+    const room = `bill:${billId}`;
+    this.server.to(room).emit('consumption-updated', {
+      billId,
+      consumption,
+      action: 'updated',
+      timestamp: new Date(),
+    });
+    this.logger.debug(`Consumption updated event emitted to room ${room}`);
+  }
+
+  /**
+   * Emite evento de consumo removido
+   */
+  emitConsumptionRemoved(billId: string, participantId: string, itemId: string): void {
+    const room = `bill:${billId}`;
+    this.server.to(room).emit('consumption-removed', {
+      billId,
+      participantId,
+      itemId,
+      action: 'removed',
+      timestamp: new Date(),
+    });
+    this.logger.debug(`Consumption removed event emitted to room ${room}`);
+  }
 }
