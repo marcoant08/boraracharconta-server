@@ -174,10 +174,21 @@ export class BillRepository implements IBillRepository {
     participantId: string,
     itemId: string,
   ): Promise<void> {
+    // Remover consumption
     await this.billModel.findByIdAndUpdate(billId, {
       $pull: {
         consumptions: {
           participantId,
+          itemId,
+        },
+      },
+    }).exec();
+
+    // Remover detail relacionado (mesmo userId + itemId)
+    await this.billModel.findByIdAndUpdate(billId, {
+      $pull: {
+        details: {
+          userId: participantId,
           itemId,
         },
       },
