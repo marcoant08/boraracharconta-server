@@ -39,6 +39,17 @@ class ConsumptionDto {
   quantity?: number;
 }
 
+class BillDetailDto {
+  @ApiProperty()
+  userId: string;
+
+  @ApiProperty()
+  itemId: string;
+
+  @ApiProperty()
+  consumedDuringAbsence: number;
+}
+
 export class BillResponseDto {
   @ApiProperty()
   id: string;
@@ -60,6 +71,9 @@ export class BillResponseDto {
 
   @ApiProperty({ type: [ConsumptionDto] })
   consumptions: ConsumptionDto[];
+
+  @ApiProperty({ type: [BillDetailDto] })
+  details: BillDetailDto[];
 
   @ApiProperty()
   createdAt: Date;

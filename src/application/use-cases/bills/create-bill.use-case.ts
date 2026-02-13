@@ -50,6 +50,7 @@ export class CreateBillUseCase {
       [adminParticipant],
       [],
       [],
+      [],
       new Date(),
       new Date(),
     );

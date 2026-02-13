@@ -17,6 +17,9 @@ import { DeleteItemFromBillUseCase } from './use-cases/bills/delete-item.use-cas
 import { AddConsumptionUseCase } from './use-cases/bills/add-consumption.use-case';
 import { UpdateConsumptionUseCase } from './use-cases/bills/update-consumption.use-case';
 import { RemoveConsumptionUseCase } from './use-cases/bills/remove-consumption.use-case';
+import { AddBillDetailUseCase } from './use-cases/bills/add-bill-detail.use-case';
+import { UpdateBillDetailUseCase } from './use-cases/bills/update-bill-detail.use-case';
+import { RemoveBillDetailUseCase } from './use-cases/bills/remove-bill-detail.use-case';
 
 @Module({
   imports: [RepositoriesModule, ServicesModule, WebSocketModule],
@@ -36,6 +39,9 @@ import { RemoveConsumptionUseCase } from './use-cases/bills/remove-consumption.u
     AddConsumptionUseCase,
     UpdateConsumptionUseCase,
     RemoveConsumptionUseCase,
+    AddBillDetailUseCase,
+    UpdateBillDetailUseCase,
+    RemoveBillDetailUseCase,
   ],
   exports: [
     RegisterUserUseCase,
@@ -53,6 +59,9 @@ import { RemoveConsumptionUseCase } from './use-cases/bills/remove-consumption.u
     AddConsumptionUseCase,
     UpdateConsumptionUseCase,
     RemoveConsumptionUseCase,
+    AddBillDetailUseCase,
+    UpdateBillDetailUseCase,
+    RemoveBillDetailUseCase,
   ],
 })
 export class ApplicationModule {}

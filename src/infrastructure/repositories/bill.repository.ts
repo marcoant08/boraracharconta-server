@@ -4,9 +4,10 @@ import { Model } from 'mongoose';
 import { Bill } from '@domain/entities/bill.entity';
 import { BillItem } from '@domain/entities/bill-item.entity';
 import { Consumption } from '@domain/entities/consumption.entity';
+import { BillDetail } from '@domain/entities/bill-detail.entity';
 import { Participant } from '@domain/value-objects/participant.vo';
 import { IBillRepository } from '@domain/repositories/bill.repository.interface';
-import { Bill as BillDocument, BillDocument as BillDoc } from '../database/schemas/bill.schema';
+import { BillDocument as BillDoc } from '../database/schemas/bill.schema';
 
 @Injectable()
 export class BillRepository implements IBillRepository {
@@ -37,6 +38,11 @@ export class BillRepository implements IBillRepository {
         itemId: c.itemId,
         quantity: c.quantity,
       })),
+      details: bill.details?.map(d => ({
+        userId: d.userId,
+        itemId: d.itemId,
+        consumedDuringAbsence: d.consumedDuringAbsence,
+      })) || [],
     });
     const saved = await createdBill.save();
     return this.toDomain(saved);
@@ -83,6 +89,11 @@ export class BillRepository implements IBillRepository {
           })),
           items: bill.items,
           consumptions: bill.consumptions,
+          details: bill.details?.map(d => ({
+            userId: d.userId,
+            itemId: d.itemId,
+            consumedDuringAbsence: d.consumedDuringAbsence,
+          })) || [],
         },
         { new: true },
       )
@@ -117,6 +128,11 @@ export class BillRepository implements IBillRepository {
     // Remover consumptions relacionados
     await this.billModel.findByIdAndUpdate(billId, {
       $pull: { consumptions: { itemId } },
+    }).exec();
+
+    // Remover details relacionados
+    await this.billModel.findByIdAndUpdate(billId, {
+      $pull: { details: { itemId } },
     }).exec();
   }
 
@@ -205,6 +221,57 @@ export class BillRepository implements IBillRepository {
         consumptions: { participantId: participant.userId },
       },
     }).exec();
+
+    // Remover details relacionados
+    await this.billModel.findByIdAndUpdate(billId, {
+      $pull: {
+        details: { userId: participant.userId },
+      },
+    }).exec();
+  }
+
+  async addBillDetail(billId: string, detail: BillDetail): Promise<void> {
+    await this.billModel.findByIdAndUpdate(billId, {
+      $push: {
+        details: {
+          userId: detail.userId,
+          itemId: detail.itemId,
+          consumedDuringAbsence: detail.consumedDuringAbsence,
+        },
+      },
+    }).exec();
+  }
+
+  async updateBillDetail(
+    billId: string,
+    userId: string,
+    itemId: string,
+    consumedDuringAbsence: number,
+  ): Promise<void> {
+    await this.billModel.findByIdAndUpdate(
+      billId,
+      {
+        $set: {
+          'details.$[det].consumedDuringAbsence': consumedDuringAbsence,
+        },
+      },
+      {
+        arrayFilters: [
+          { 'det.userId': userId, 'det.itemId': itemId },
+        ],
+      },
+    ).exec();
+  }
+
+  async removeBillDetail(billId: string, userId: string, itemId: string): Promise<void> {
+    await this.billModel.findByIdAndUpdate(billId, {
+      $pull: {
+        details: {
+          userId,
+          itemId,
+        },
+      },
+    }).exec();
   }
 
   private toDomain(bill: BillDoc): Bill {
@@ -221,6 +288,7 @@ export class BillRepository implements IBillRepository {
       }),
       bill.items.map(i => new BillItem(i.id, i.name, i.value, i.quantity, i.category)),
       bill.consumptions.map(c => new Consumption(c.participantId, c.itemId, c.quantity)),
+      (bill.details || []).map(d => new BillDetail(d.userId, d.itemId, d.consumedDuringAbsence)),
       (bill as any).createdAt || new Date(),
       (bill as any).updatedAt || new Date(),
     );

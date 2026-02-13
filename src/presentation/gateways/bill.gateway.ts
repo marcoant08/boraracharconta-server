@@ -180,6 +180,11 @@ export class BillGateway
         itemId: c.itemId,
         quantity: c.quantity,
       })),
+      details: bill.details?.map((d) => ({
+        userId: d.userId,
+        itemId: d.itemId,
+        consumedDuringAbsence: d.consumedDuringAbsence,
+      })) || [],
       createdAt: bill.createdAt,
       updatedAt: bill.updatedAt,
     };
@@ -290,5 +295,48 @@ export class BillGateway
       timestamp: new Date(),
     });
     this.logger.debug(`Consumption removed event emitted to room ${room}`);
+  }
+
+  /**
+   * Emite evento de detail adicionado
+   */
+  emitBillDetailAdded(billId: string, detail: any): void {
+    const room = `bill:${billId}`;
+    this.server.to(room).emit('bill-detail-added', {
+      billId,
+      detail,
+      action: 'added',
+      timestamp: new Date(),
+    });
+    this.logger.debug(`Bill detail added event emitted to room ${room}`);
+  }
+
+  /**
+   * Emite evento de detail atualizado
+   */
+  emitBillDetailUpdated(billId: string, detail: any): void {
+    const room = `bill:${billId}`;
+    this.server.to(room).emit('bill-detail-updated', {
+      billId,
+      detail,
+      action: 'updated',
+      timestamp: new Date(),
+    });
+    this.logger.debug(`Bill detail updated event emitted to room ${room}`);
+  }
+
+  /**
+   * Emite evento de detail removido
+   */
+  emitBillDetailRemoved(billId: string, userId: string, itemId: string): void {
+    const room = `bill:${billId}`;
+    this.server.to(room).emit('bill-detail-removed', {
+      billId,
+      userId,
+      itemId,
+      action: 'removed',
+      timestamp: new Date(),
+    });
+    this.logger.debug(`Bill detail removed event emitted to room ${room}`);
   }
 }

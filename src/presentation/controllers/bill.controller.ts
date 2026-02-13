@@ -33,6 +33,9 @@ import { DeleteItemFromBillUseCase } from '@application/use-cases/bills/delete-i
 import { AddConsumptionUseCase } from '@application/use-cases/bills/add-consumption.use-case';
 import { UpdateConsumptionUseCase } from '@application/use-cases/bills/update-consumption.use-case';
 import { RemoveConsumptionUseCase } from '@application/use-cases/bills/remove-consumption.use-case';
+import { AddBillDetailUseCase } from '@application/use-cases/bills/add-bill-detail.use-case';
+import { UpdateBillDetailUseCase } from '@application/use-cases/bills/update-bill-detail.use-case';
+import { RemoveBillDetailUseCase } from '@application/use-cases/bills/remove-bill-detail.use-case';
 import { CreateBillDto } from '../dto/bills/create-bill.dto';
 import { JoinBillDto } from '../dto/bills/join-bill.dto';
 import { AddParticipantDto } from '../dto/bills/add-participant.dto';
@@ -40,6 +43,9 @@ import { AddItemDto } from '../dto/bills/add-item.dto';
 import { AddConsumptionDto } from '../dto/bills/add-consumption.dto';
 import { UpdateConsumptionDto } from '../dto/bills/update-consumption.dto';
 import { RemoveConsumptionDto } from '../dto/bills/remove-consumption.dto';
+import { AddBillDetailDto } from '../dto/bills/add-bill-detail.dto';
+import { UpdateBillDetailDto } from '../dto/bills/update-bill-detail.dto';
+import { RemoveBillDetailDto } from '../dto/bills/remove-bill-detail.dto';
 import { BillResponseDto } from '../dto/bills/bill-response.dto';
 import { BillSummaryDto } from '../dto/bills/bill-summary.dto';
 import { Bill } from '@domain/entities/bill.entity';
@@ -61,6 +67,9 @@ export class BillController {
     private readonly addConsumptionUseCase: AddConsumptionUseCase,
     private readonly updateConsumptionUseCase: UpdateConsumptionUseCase,
     private readonly removeConsumptionUseCase: RemoveConsumptionUseCase,
+    private readonly addBillDetailUseCase: AddBillDetailUseCase,
+    private readonly updateBillDetailUseCase: UpdateBillDetailUseCase,
+    private readonly removeBillDetailUseCase: RemoveBillDetailUseCase,
   ) {}
 
   @Post()
@@ -229,6 +238,61 @@ export class BillController {
     );
   }
 
+  @Post(':billId/details')
+  @HttpCode(HttpStatus.CREATED)
+  @UseGuards(BillParticipantGuard, CanManageItemsGuard)
+  @ApiOperation({ summary: 'Adicionar detail de consumo durante ausência' })
+  @ApiParam({ name: 'billId', description: 'ID da conta' })
+  @ApiResponse({ status: 201, description: 'Detail adicionado com sucesso' })
+  async addBillDetail(
+    @Param('billId') billId: string,
+    @Body() addBillDetailDto: AddBillDetailDto,
+  ) {
+    await this.addBillDetailUseCase.execute(
+      billId,
+      addBillDetailDto.userId,
+      addBillDetailDto.itemId,
+      addBillDetailDto.consumedDuringAbsence,
+    );
+    return { message: 'Detail adicionado com sucesso' };
+  }
+
+  @Put(':billId/details')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(BillParticipantGuard, CanManageItemsGuard)
+  @ApiOperation({ summary: 'Atualizar quantidade consumida durante ausência' })
+  @ApiParam({ name: 'billId', description: 'ID da conta' })
+  @ApiResponse({ status: 200, description: 'Detail atualizado com sucesso' })
+  async updateBillDetail(
+    @Param('billId') billId: string,
+    @Body() updateBillDetailDto: UpdateBillDetailDto,
+  ) {
+    await this.updateBillDetailUseCase.execute(
+      billId,
+      updateBillDetailDto.userId,
+      updateBillDetailDto.itemId,
+      updateBillDetailDto.consumedDuringAbsence,
+    );
+    return { message: 'Detail atualizado com sucesso' };
+  }
+
+  @Delete(':billId/details')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(BillParticipantGuard, CanManageItemsGuard)
+  @ApiOperation({ summary: 'Remover detail de consumo durante ausência' })
+  @ApiParam({ name: 'billId', description: 'ID da conta' })
+  @ApiResponse({ status: 204, description: 'Detail removido com sucesso' })
+  async removeBillDetail(
+    @Param('billId') billId: string,
+    @Body() removeBillDetailDto: RemoveBillDetailDto,
+  ) {
+    await this.removeBillDetailUseCase.execute(
+      billId,
+      removeBillDetailDto.userId,
+      removeBillDetailDto.itemId,
+    );
+  }
+
   private mapToResponse(bill: Bill): BillResponseDto {
     return {
       id: bill.id,
@@ -238,6 +302,7 @@ export class BillController {
       participants: bill.participants,
       items: bill.items,
       consumptions: bill.consumptions,
+      details: bill.details || [],
       createdAt: bill.createdAt,
       updatedAt: bill.updatedAt,
     };

@@ -1,6 +1,7 @@
 import { Participant } from '../value-objects/participant.vo';
 import { BillItem } from './bill-item.entity';
 import { Consumption } from './consumption.entity';
+import { BillDetail } from './bill-detail.entity';
 
 export class Bill {
   id: string;
@@ -10,6 +11,7 @@ export class Bill {
   participants: Participant[];
   items: BillItem[];
   consumptions: Consumption[];
+  details: BillDetail[];
   createdAt: Date;
   updatedAt: Date;
 
@@ -21,6 +23,7 @@ export class Bill {
     participants: Participant[],
     items: BillItem[],
     consumptions: Consumption[],
+    details: BillDetail[],
     createdAt: Date,
     updatedAt: Date,
   ) {
@@ -31,6 +34,7 @@ export class Bill {
     this.participants = participants;
     this.items = items;
     this.consumptions = consumptions;
+    this.details = details;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
   }

@@ -4,6 +4,7 @@ import { BillGateway } from '@presentation/gateways/bill.gateway';
 import { BillItem } from '@domain/entities/bill-item.entity';
 import { Participant } from '@domain/value-objects/participant.vo';
 import { Consumption } from '@domain/entities/consumption.entity';
+import { BillDetail } from '@domain/entities/bill-detail.entity';
 
 @Injectable()
 export class BillEventsService {
@@ -71,5 +72,25 @@ export class BillEventsService {
 
   async emitConsumptionRemoved(billId: string, participantId: string, itemId: string): Promise<void> {
     this.billGateway.emitConsumptionRemoved(billId, participantId, itemId);
+  }
+
+  async emitBillDetailAdded(billId: string, detail: BillDetail): Promise<void> {
+    this.billGateway.emitBillDetailAdded(billId, {
+      userId: detail.userId,
+      itemId: detail.itemId,
+      consumedDuringAbsence: detail.consumedDuringAbsence,
+    });
+  }
+
+  async emitBillDetailUpdated(billId: string, userId: string, itemId: string, consumedDuringAbsence: number): Promise<void> {
+    this.billGateway.emitBillDetailUpdated(billId, {
+      userId,
+      itemId,
+      consumedDuringAbsence,
+    });
+  }
+
+  async emitBillDetailRemoved(billId: string, userId: string, itemId: string): Promise<void> {
+    this.billGateway.emitBillDetailRemoved(billId, userId, itemId);
   }
 }

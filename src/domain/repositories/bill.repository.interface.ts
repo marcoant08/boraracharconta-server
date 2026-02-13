@@ -1,6 +1,7 @@
 import { Bill } from '../entities/bill.entity';
 import { BillItem } from '../entities/bill-item.entity';
 import { Consumption } from '../entities/consumption.entity';
+import { BillDetail } from '../entities/bill-detail.entity';
 import { Participant } from '../value-objects/participant.vo';
 
 export interface IBillRepository {
@@ -28,4 +29,12 @@ export interface IBillRepository {
   ): Promise<void>;
   addParticipant(billId: string, participant: Participant): Promise<void>;
   removeParticipant(billId: string, participantId: string): Promise<void>;
+  addBillDetail(billId: string, detail: BillDetail): Promise<void>;
+  updateBillDetail(
+    billId: string,
+    userId: string,
+    itemId: string,
+    consumedDuringAbsence: number,
+  ): Promise<void>;
+  removeBillDetail(billId: string, userId: string, itemId: string): Promise<void>;
 }
