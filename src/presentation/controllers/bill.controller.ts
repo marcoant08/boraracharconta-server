@@ -241,7 +241,7 @@ export class BillController {
   @Post(':billId/details')
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(BillParticipantGuard, CanManageItemsGuard)
-  @ApiOperation({ summary: 'Adicionar detail de consumo durante ausência' })
+  @ApiOperation({ summary: 'Adicionar evento na linha do tempo (join/left)' })
   @ApiParam({ name: 'billId', description: 'ID da conta' })
   @ApiResponse({ status: 201, description: 'Detail adicionado com sucesso' })
   async addBillDetail(
@@ -250,9 +250,10 @@ export class BillController {
   ) {
     await this.addBillDetailUseCase.execute(
       billId,
-      addBillDetailDto.userId,
       addBillDetailDto.itemId,
-      addBillDetailDto.consumedDuringAbsence,
+      addBillDetailDto.userId,
+      addBillDetailDto.quantityConsumed,
+      addBillDetailDto.action,
     );
     return { message: 'Detail adicionado com sucesso' };
   }
@@ -260,7 +261,7 @@ export class BillController {
   @Put(':billId/details')
   @HttpCode(HttpStatus.OK)
   @UseGuards(BillParticipantGuard, CanManageItemsGuard)
-  @ApiOperation({ summary: 'Atualizar quantidade consumida durante ausência' })
+  @ApiOperation({ summary: 'Atualizar evento na linha do tempo' })
   @ApiParam({ name: 'billId', description: 'ID da conta' })
   @ApiResponse({ status: 200, description: 'Detail atualizado com sucesso' })
   async updateBillDetail(
@@ -269,9 +270,10 @@ export class BillController {
   ) {
     await this.updateBillDetailUseCase.execute(
       billId,
-      updateBillDetailDto.userId,
       updateBillDetailDto.itemId,
-      updateBillDetailDto.consumedDuringAbsence,
+      updateBillDetailDto.userId,
+      updateBillDetailDto.quantityConsumed,
+      updateBillDetailDto.action,
     );
     return { message: 'Detail atualizado com sucesso' };
   }

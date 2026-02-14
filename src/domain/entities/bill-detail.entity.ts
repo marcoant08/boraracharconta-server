@@ -1,15 +1,18 @@
 export class BillDetail {
-  userId: string;
   itemId: string;
-  consumedDuringAbsence: number;
+  userId: string;
+  quantityConsumed: number;
+  action: 'join' | 'left';
 
   constructor(
-    userId: string,
     itemId: string,
-    consumedDuringAbsence: number,
+    userId: string,
+    quantityConsumed: number,
+    action: 'join' | 'left',
   ) {
-    this.userId = userId;
     this.itemId = itemId;
-    this.consumedDuringAbsence = consumedDuringAbsence;
+    this.userId = userId;
+    this.quantityConsumed = quantityConsumed;
+    this.action = action;
   }
 }

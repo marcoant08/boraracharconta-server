@@ -32,9 +32,10 @@ export interface IBillRepository {
   addBillDetail(billId: string, detail: BillDetail): Promise<void>;
   updateBillDetail(
     billId: string,
-    userId: string,
     itemId: string,
-    consumedDuringAbsence: number,
+    userId: string,
+    quantityConsumed: number,
+    action: 'join' | 'left',
   ): Promise<void>;
   removeBillDetail(billId: string, userId: string, itemId: string): Promise<void>;
 }

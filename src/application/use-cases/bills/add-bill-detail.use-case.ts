@@ -13,9 +13,10 @@ export class AddBillDetailUseCase {
 
   async execute(
     billId: string,
-    userId: string,
     itemId: string,
-    consumedDuringAbsence: number,
+    userId: string,
+    quantityConsumed: number,
+    action: 'join' | 'left',
   ): Promise<void> {
     const bill = await this.billRepository.findById(billId);
 
@@ -30,28 +31,60 @@ export class AddBillDetailUseCase {
     }
 
     // Verificar se participante existe
-    const participantExists = bill.participants.some(
+    const participant = bill.participants.find(
       (p) => p.userId === userId || p.name === userId,
     );
-    if (!participantExists) {
+    console.log("[participant]", participant);
+    if (!participant) {
       throw new NotFoundException('Participante não encontrado');
     }
 
-    // Verificar se já existe um detail com os mesmos userId e itemId
-    const detailExists = bill.details?.some(
-      (d) => d.userId === userId && d.itemId === itemId,
+    // Calcular estado atual do participante na linha do tempo
+    const billDetails = bill.details || [];
+    const currentState = this.getParticipantCurrentState(
+      billDetails,
+      userId,
+      itemId,
     );
-    if (detailExists) {
+
+    // Validar ação baseada no estado atual
+    const isFirstJoin = billDetails.filter(
+      (d) => d.userId === userId && d.itemId === itemId,
+    ).length === 0;
+    if (action === 'join' && currentState === 'present' && !isFirstJoin) {
       throw new BadRequestException(
-        'Já existe um detail para este participante e item. Use a atualização para modificar a quantidade.',
+        'Participante já está na mesa. Não é possível fazer join novamente.',
       );
     }
 
-    const detail = new BillDetail(userId, itemId, consumedDuringAbsence);
+    if (action === 'left' && currentState === 'absent') {
+      throw new BadRequestException(
+        'Participante não está na mesa. Não é possível fazer left.',
+      );
+    }
+
+    const detail = new BillDetail(itemId, userId, quantityConsumed, action);
 
     await this.billRepository.addBillDetail(billId, detail);
 
     // Emitir evento WebSocket
     await this.billEventsService.emitBillDetailAdded(billId, detail);
+  }
+
+  private getParticipantCurrentState(
+    details: BillDetail[],
+    userId: string,
+    itemId: string,
+  ): 'present' | 'absent' {
+    // Filtrar details do participante para este item (manter ordem de inserção)
+    const participantDetails = (details || []).filter(
+      (d) => d.userId === userId && d.itemId === itemId,
+    );
+
+    if (participantDetails.length === 0) return 'present';
+
+    // Último evento determina estado atual
+    const lastEvent = participantDetails[participantDetails.length - 1];
+    return lastEvent.action === 'join' ? 'present' : 'absent';
   }
 }

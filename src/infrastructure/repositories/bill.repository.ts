@@ -39,9 +39,10 @@ export class BillRepository implements IBillRepository {
         quantity: c.quantity,
       })),
       details: bill.details?.map(d => ({
-        userId: d.userId,
         itemId: d.itemId,
-        consumedDuringAbsence: d.consumedDuringAbsence,
+        userId: d.userId,
+        quantityConsumed: d.quantityConsumed,
+        action: d.action,
       })) || [],
     });
     const saved = await createdBill.save();
@@ -90,9 +91,10 @@ export class BillRepository implements IBillRepository {
           items: bill.items,
           consumptions: bill.consumptions,
           details: bill.details?.map(d => ({
-            userId: d.userId,
             itemId: d.itemId,
-            consumedDuringAbsence: d.consumedDuringAbsence,
+            userId: d.userId,
+            quantityConsumed: d.quantityConsumed,
+            action: d.action,
           })) || [],
         },
         { new: true },
@@ -245,9 +247,10 @@ export class BillRepository implements IBillRepository {
     await this.billModel.findByIdAndUpdate(billId, {
       $push: {
         details: {
-          userId: detail.userId,
           itemId: detail.itemId,
-          consumedDuringAbsence: detail.consumedDuringAbsence,
+          userId: detail.userId,
+          quantityConsumed: detail.quantityConsumed,
+          action: detail.action,
         },
       },
     }).exec();
@@ -255,15 +258,20 @@ export class BillRepository implements IBillRepository {
 
   async updateBillDetail(
     billId: string,
-    userId: string,
     itemId: string,
-    consumedDuringAbsence: number,
+    userId: string,
+    quantityConsumed: number,
+    action: 'join' | 'left',
   ): Promise<void> {
+    // Atualizar o último detail do userId + itemId (ordem de inserção)
+    // Como não temos ID único, vamos atualizar todos que correspondem
+    // Na prática, isso atualiza todos os details desse userId + itemId
     await this.billModel.findByIdAndUpdate(
       billId,
       {
         $set: {
-          'details.$[det].consumedDuringAbsence': consumedDuringAbsence,
+          'details.$[det].quantityConsumed': quantityConsumed,
+          'details.$[det].action': action,
         },
       },
       {
@@ -299,7 +307,13 @@ export class BillRepository implements IBillRepository {
       }),
       bill.items.map(i => new BillItem(i.id, i.name, i.value, i.quantity, i.category)),
       bill.consumptions.map(c => new Consumption(c.participantId, c.itemId, c.quantity)),
-      (bill.details || []).map(d => new BillDetail(d.userId, d.itemId, d.consumedDuringAbsence)),
+      (bill.details || []).map(d => {
+        // Compatibilidade com dados antigos: se não tiver action, tratar como 'join' com consumedDuringAbsence
+        if (!d.action && (d as any).consumedDuringAbsence !== undefined) {
+          return new BillDetail(d.itemId, d.userId, (d as any).consumedDuringAbsence, 'join');
+        }
+        return new BillDetail(d.itemId, d.userId, d.quantityConsumed, d.action);
+      }),
       (bill as any).createdAt || new Date(),
       (bill as any).updatedAt || new Date(),
     );

@@ -181,9 +181,10 @@ export class BillGateway
         quantity: c.quantity,
       })),
       details: bill.details?.map((d) => ({
-        userId: d.userId,
         itemId: d.itemId,
-        consumedDuringAbsence: d.consumedDuringAbsence,
+        userId: d.userId,
+        quantityConsumed: d.quantityConsumed,
+        action: d.action,
       })) || [],
       createdAt: bill.createdAt,
       updatedAt: bill.updatedAt,

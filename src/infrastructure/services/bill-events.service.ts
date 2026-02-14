@@ -76,17 +76,25 @@ export class BillEventsService {
 
   async emitBillDetailAdded(billId: string, detail: BillDetail): Promise<void> {
     this.billGateway.emitBillDetailAdded(billId, {
-      userId: detail.userId,
       itemId: detail.itemId,
-      consumedDuringAbsence: detail.consumedDuringAbsence,
+      userId: detail.userId,
+      quantityConsumed: detail.quantityConsumed,
+      action: detail.action,
     });
   }
 
-  async emitBillDetailUpdated(billId: string, userId: string, itemId: string, consumedDuringAbsence: number): Promise<void> {
+  async emitBillDetailUpdated(
+    billId: string,
+    itemId: string,
+    userId: string,
+    quantityConsumed: number,
+    action: 'join' | 'left',
+  ): Promise<void> {
     this.billGateway.emitBillDetailUpdated(billId, {
-      userId,
       itemId,
-      consumedDuringAbsence,
+      userId,
+      quantityConsumed,
+      action,
     });
   }
 

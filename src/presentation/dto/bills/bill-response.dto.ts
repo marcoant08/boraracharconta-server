@@ -41,13 +41,16 @@ class ConsumptionDto {
 
 class BillDetailDto {
   @ApiProperty()
-  userId: string;
-
-  @ApiProperty()
   itemId: string;
 
   @ApiProperty()
-  consumedDuringAbsence: number;
+  userId: string;
+
+  @ApiProperty()
+  quantityConsumed: number;
+
+  @ApiProperty({ enum: ['join', 'left'] })
+  action: 'join' | 'left';
 }
 
 export class BillResponseDto {
