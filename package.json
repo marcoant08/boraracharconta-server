@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "nest build",
+    "build:vercel": "nest build && tsc-alias -p tsconfig.json",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -45,10 +46,12 @@
   "devDependencies": {
     "@nestjs/cli": "^11.0.16",
     "@types/bcrypt": "^6.0.0",
+    "@types/express": "^5.0.6",
     "@types/node": "^25.2.0",
     "@types/nodemailer": "^7.0.9",
     "@types/passport-jwt": "^4.0.1",
     "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.16",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.9.3"
   }
