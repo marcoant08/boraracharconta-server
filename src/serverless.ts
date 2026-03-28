@@ -1,6 +1,5 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './presentation/filters/http-exception.filter';
@@ -8,12 +7,16 @@ import * as express from 'express';
 import { Express } from 'express';
 
 let cachedApp: Express | null = null;
+let initPromise: Promise<Express> | null = null;
 
 async function createApp(): Promise<Express> {
   const expressApp = express();
   const adapter = new ExpressAdapter(expressApp);
 
-  const app = await NestFactory.create(AppModule, adapter, { logger: false });
+  const app = await NestFactory.create(AppModule, adapter, {
+    logger: ['error', 'warn'],
+    abortOnError: false,
+  });
 
   app.useGlobalFilters(new GlobalExceptionFilter());
 
@@ -32,25 +35,24 @@ async function createApp(): Promise<Express> {
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
-  const config = new DocumentBuilder()
-    .setTitle('Divisão de Contas API')
-    .setDescription('API para divisão de contas entre amigos')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .addTag('auth', 'Autenticação')
-    .addTag('bills', 'Gerenciamento de Contas')
-    .build();
-
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document);
-
   await app.init();
   return expressApp;
 }
 
 export default async function handler(req: any, res: any) {
   if (!cachedApp) {
-    cachedApp = await createApp();
+    if (!initPromise) {
+      initPromise = createApp()
+        .then((app) => {
+          cachedApp = app;
+          return app;
+        })
+        .catch((err) => {
+          initPromise = null;
+          throw err;
+        });
+    }
+    await initPromise;
   }
-  cachedApp(req, res);
+  cachedApp!(req, res);
 }

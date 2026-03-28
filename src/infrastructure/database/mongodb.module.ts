@@ -9,6 +9,13 @@ import { Bill, BillSchema } from './schemas/bill.schema';
     MongooseModule.forRootAsync({
       useFactory: (configService: ConfigService) => ({
         uri: configService.get<string>('mongodb.uri'),
+        // Otimizações para ambiente serverless
+        bufferCommands: false,
+        serverSelectionTimeoutMS: 5000,
+        socketTimeoutMS: 10000,
+        connectTimeoutMS: 5000,
+        maxPoolSize: 5,
+        minPoolSize: 0,
       }),
       inject: [ConfigService],
     }),
