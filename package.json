@@ -20,6 +20,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": ">=24.0.0 <25"
+  },
   "type": "commonjs",
   "dependencies": {
     "@nestjs/common": "^11.1.13",

@@ -4,7 +4,7 @@ API backend para aplicação de divisão de contas entre amigos usando NestJS, M
 
 ## Pré-requisitos
 
-- Node.js (v18 ou superior)
+- Node.js **24** (definido em `.nvmrc`, `.node-version` e `package.json` → `engines`)
 - MongoDB (local ou remoto)
 - npm ou yarn
 
