@@ -2,8 +2,6 @@ import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { IBillRepository } from '@domain/repositories/bill.repository.interface';
 import { IUserRepository } from '@domain/repositories/user.repository.interface';
 import { Participant } from '@domain/value-objects/participant.vo';
-import { BillEventsService } from '@infrastructure/services/bill-events.service';
-
 @Injectable()
 export class JoinBillByCodeUseCase {
   constructor(
@@ -11,7 +9,6 @@ export class JoinBillByCodeUseCase {
     private readonly billRepository: IBillRepository,
     @Inject('IUserRepository')
     private readonly userRepository: IUserRepository,
-    private readonly billEventsService: BillEventsService,
   ) {}
 
   async execute(code: string, userId: string): Promise<string> {
@@ -38,9 +35,6 @@ export class JoinBillByCodeUseCase {
     const participant = new Participant(userId, user.name, false, new Date()); // não é visitante
 
     await this.billRepository.addParticipant(bill.id, participant);
-
-    // Emitir evento WebSocket para notificar outros participantes
-    await this.billEventsService.emitParticipantAdded(bill.id, participant);
 
     return bill.id;
   }

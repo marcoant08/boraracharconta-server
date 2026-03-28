@@ -21,7 +21,7 @@ async function bootstrap() {
     }),
   );
 
-  // CORS - Configurado para funcionar com HTTP e WebSocket
+  // CORS
   app.enableCors({
     origin: '*', // Em produção, especificar domínios permitidos
     credentials: true,

@@ -1,6 +1,6 @@
 # Backend - Divisão de Contas
 
-API backend para aplicação de divisão de contas entre amigos usando NestJS, MongoDB, Clean Architecture, JWT e WebSockets.
+API backend para aplicação de divisão de contas entre amigos usando NestJS, MongoDB, Clean Architecture e JWT (API REST).
 
 ## Pré-requisitos
 
@@ -48,7 +48,7 @@ src/
 ├── domain/           # Entidades e regras de negócio
 ├── application/      # Casos de uso (services)
 ├── infrastructure/   # Implementações técnicas
-└── presentation/     # Controllers, DTOs, WebSockets
+└── presentation/     # Controllers, DTOs, guards
 ```
 
 ## Variáveis de Ambiente

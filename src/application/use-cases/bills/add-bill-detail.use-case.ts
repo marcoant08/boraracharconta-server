@@ -1,14 +1,11 @@
 import { Injectable, NotFoundException, BadRequestException, Inject } from '@nestjs/common';
 import { IBillRepository } from '@domain/repositories/bill.repository.interface';
 import { BillDetail } from '@domain/entities/bill-detail.entity';
-import { BillEventsService } from '@infrastructure/services/bill-events.service';
-
 @Injectable()
 export class AddBillDetailUseCase {
   constructor(
     @Inject('IBillRepository')
     private readonly billRepository: IBillRepository,
-    private readonly billEventsService: BillEventsService,
   ) {}
 
   async execute(
@@ -66,9 +63,6 @@ export class AddBillDetailUseCase {
     const detail = new BillDetail(itemId, userId, quantityConsumed, action);
 
     await this.billRepository.addBillDetail(billId, detail);
-
-    // Emitir evento WebSocket
-    await this.billEventsService.emitBillDetailAdded(billId, detail);
   }
 
   private getParticipantCurrentState(
