@@ -1,9 +1,8 @@
 {
   "version": 2,
   "buildCommand": "npm run build:vercel",
-  "outputDirectory": "dist",
   "functions": {
-    "dist/serverless.js": {
+    "api/index.js": {
       "memory": 1024,
       "maxDuration": 30
     }
@@ -11,7 +10,7 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "dist/serverless.js"
+      "dest": "/api/index.js"
     }
   ]
 }
