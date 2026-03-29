@@ -37,10 +37,10 @@
     "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.3",
-    "nodemailer": "^8.0.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.2",
+    "resend": "^6.9.4",
     "rxjs": "^7.8.2"
   },
   "devDependencies": {
@@ -48,7 +48,6 @@
     "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.6",
     "@types/node": "^25.2.0",
-    "@types/nodemailer": "^7.0.9",
     "@types/passport-jwt": "^4.0.1",
     "ts-loader": "^9.5.4",
     "ts-node": "^10.9.2",

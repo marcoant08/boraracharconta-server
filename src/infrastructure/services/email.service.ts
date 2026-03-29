@@ -1,34 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 @Injectable()
 export class EmailService {
-  private transporter: nodemailer.Transporter;
+  private resend: Resend;
+  private from: string;
 
   constructor(private configService: ConfigService) {
-    this.transporter = nodemailer.createTransport({
-      host: this.configService.get<string>('smtp.host'),
-      port: this.configService.get<number>('smtp.port'),
-      secure: false,
-      auth: {
-        user: this.configService.get<string>('smtp.user'),
-        pass: this.configService.get<string>('smtp.pass'),
-      },
-    });
+    this.resend = new Resend(this.configService.get<string>('resend.apiKey'));
+    this.from = this.configService.get<string>('resend.from');
   }
 
   async sendVerificationCode(email: string, code: string): Promise<void> {
-    const mailOptions = {
-      from: this.configService.get<string>('smtp.from'),
-      to: email,
-      subject: 'Código de Verificação',
-      text: `Seu código de verificação é: ${code}`,
-      html: `<p>Seu código de verificação é: <strong>${code}</strong></p>`,
-    };
-
     try {
-      await this.transporter.sendMail(mailOptions);
+      await this.resend.emails.send({
+        from: this.from,
+        to: email,
+        subject: 'Código de Verificação',
+        html: `<p>Seu código de verificação é: <strong>${code}</strong></p>`,
+      });
     } catch (error) {
       console.error('Erro ao enviar email:', error);
       throw new Error('Falha ao enviar email de verificação');
