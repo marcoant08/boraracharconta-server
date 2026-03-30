@@ -48,6 +48,7 @@ async function bootstrap() {
     await app.listen(port);
     console.log(`Application is running on: http://localhost:${port}`);
     console.log(`Swagger documentation: http://localhost:${port}/docs`);
+    console.log('gigi🩷');
   } catch (error) {
     console.error('[main] ERROR during bootstrap:', error);
     console.error('[main] Error stack:', error.stack);

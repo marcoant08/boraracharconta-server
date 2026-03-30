@@ -15,7 +15,7 @@ export class CreateBillUseCase {
     private readonly codeGeneratorService: CodeGeneratorService,
   ) {}
 
-  async execute(adminId: string, name: string): Promise<Bill> {
+  async execute(adminId: string, name: string, isPublic: boolean): Promise<Bill> {
     // Buscar o usuário criador
     const user = await this.userRepository.findById(adminId);
     if (!user) {
@@ -47,6 +47,7 @@ export class CreateBillUseCase {
       code!,
       adminId,
       name,
+      isPublic,
       [adminParticipant],
       [],
       [],

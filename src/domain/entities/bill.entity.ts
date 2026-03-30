@@ -8,6 +8,7 @@ export class Bill {
   code: string;
   adminId: string;
   name: string;
+  isPublic: boolean;
   participants: Participant[];
   items: BillItem[];
   consumptions: Consumption[];
@@ -20,6 +21,7 @@ export class Bill {
     code: string,
     adminId: string,
     name: string,
+    isPublic: boolean,
     participants: Participant[],
     items: BillItem[],
     consumptions: Consumption[],
@@ -31,6 +33,7 @@ export class Bill {
     this.code = code;
     this.adminId = adminId;
     this.name = name;
+    this.isPublic = isPublic;
     this.participants = participants;
     this.items = items;
     this.consumptions = consumptions;

@@ -20,6 +20,7 @@ export class BillRepository implements IBillRepository {
       code: bill.code,
       adminId: bill.adminId,
       name: bill.name,
+      isPublic: bill.isPublic,
       participants: bill.participants.map(p => ({
         userId: p.userId,
         name: p.name,
@@ -82,6 +83,7 @@ export class BillRepository implements IBillRepository {
           code: bill.code,
           adminId: bill.adminId,
           name: bill.name,
+          isPublic: bill.isPublic,
           participants: bill.participants.map(p => ({
             userId: p.userId,
             name: p.name,
@@ -299,6 +301,7 @@ export class BillRepository implements IBillRepository {
       bill.code,
       bill.adminId,
       bill.name,
+      bill.isPublic ?? false,
       bill.participants.map(p => {
         // Migração: se userId não existir (dados antigos), usar name como userId e marcar como visitante
         const userId = p.userId ?? p.name;

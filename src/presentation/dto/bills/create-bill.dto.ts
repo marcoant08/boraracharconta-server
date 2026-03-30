@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateBillDto {
   @ApiProperty({
@@ -9,4 +9,12 @@ export class CreateBillDto {
   @IsString()
   @IsNotEmpty()
   name: string;
+
+  @ApiProperty({
+    description: 'Define se a conta pode ser visualizada publicamente via código',
+    example: true,
+  })
+  @IsBoolean()
+  @IsNotEmpty()
+  isPublic: boolean;
 }

@@ -66,6 +66,9 @@ export class BillResponseDto {
   @ApiProperty()
   name: string;
 
+  @ApiProperty()
+  isPublic: boolean;
+
   @ApiProperty({ type: [ParticipantDto] })
   participants: ParticipantDto[];
 

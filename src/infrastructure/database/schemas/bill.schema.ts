@@ -18,6 +18,9 @@ export class Bill {
   @Prop({ required: true })
   name: string;
 
+  @Prop({ required: true, default: false })
+  isPublic: boolean;
+
   @Prop({ type: [ParticipantSchema], default: [] })
   participants: Participant[];
 

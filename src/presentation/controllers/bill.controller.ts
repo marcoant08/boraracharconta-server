@@ -19,12 +19,10 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { BillParticipantGuard } from '../guards/bill-participant.guard';
-import { CanManageItemsGuard } from '../guards/can-manage-items.guard';
-import { CanManageParticipantsGuard } from '../guards/can-manage-participants.guard';
+import { BillAdminGuard } from '../guards/bill-admin.guard';
 import { CreateBillUseCase } from '@application/use-cases/bills/create-bill.use-case';
-import { JoinBillByCodeUseCase } from '@application/use-cases/bills/join-bill.use-case';
 import { GetBillUseCase } from '@application/use-cases/bills/get-bill.use-case';
+import { GetBillByCodeUseCase } from '@application/use-cases/bills/get-bill-by-code.use-case';
 import { ListUserBillsUseCase } from '@application/use-cases/bills/list-user-bills.use-case';
 import { AddParticipantToBillUseCase } from '@application/use-cases/bills/add-participant.use-case';
 import { RemoveParticipantFromBillUseCase } from '@application/use-cases/bills/remove-participant.use-case';
@@ -37,7 +35,6 @@ import { AddBillDetailUseCase } from '@application/use-cases/bills/add-bill-deta
 import { UpdateBillDetailUseCase } from '@application/use-cases/bills/update-bill-detail.use-case';
 import { RemoveBillDetailUseCase } from '@application/use-cases/bills/remove-bill-detail.use-case';
 import { CreateBillDto } from '../dto/bills/create-bill.dto';
-import { JoinBillDto } from '../dto/bills/join-bill.dto';
 import { AddParticipantDto } from '../dto/bills/add-participant.dto';
 import { AddItemDto } from '../dto/bills/add-item.dto';
 import { AddConsumptionDto } from '../dto/bills/add-consumption.dto';
@@ -52,13 +49,11 @@ import { Bill } from '@domain/entities/bill.entity';
 
 @ApiTags('bills')
 @Controller('bills')
-@UseGuards(JwtAuthGuard)
-@ApiBearerAuth()
 export class BillController {
   constructor(
     private readonly createBillUseCase: CreateBillUseCase,
-    private readonly joinBillByCodeUseCase: JoinBillByCodeUseCase,
     private readonly getBillUseCase: GetBillUseCase,
+    private readonly getBillByCodeUseCase: GetBillByCodeUseCase,
     private readonly listUserBillsUseCase: ListUserBillsUseCase,
     private readonly addParticipantToBillUseCase: AddParticipantToBillUseCase,
     private readonly removeParticipantFromBillUseCase: RemoveParticipantFromBillUseCase,
@@ -72,7 +67,20 @@ export class BillController {
     private readonly removeBillDetailUseCase: RemoveBillDetailUseCase,
   ) {}
 
+  @Get('code/:code')
+  @ApiOperation({ summary: 'Visualizar conta pública pelo código (sem autenticação)' })
+  @ApiParam({ name: 'code', description: 'Código da conta' })
+  @ApiResponse({ status: 200, description: 'Conta encontrada', type: BillResponseDto })
+  @ApiResponse({ status: 403, description: 'Conta privada' })
+  @ApiResponse({ status: 404, description: 'Conta não encontrada' })
+  async getBillByCode(@Param('code') code: string) {
+    const bill = await this.getBillByCodeUseCase.execute(code);
+    return this.mapToResponse(bill);
+  }
+
   @Post()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Criar nova conta' })
   @ApiResponse({ status: 201, description: 'Conta criada com sucesso', type: BillResponseDto })
@@ -80,20 +88,14 @@ export class BillController {
     const bill = await this.createBillUseCase.execute(
       req.user.userId,
       createBillDto.name,
+      createBillDto.isPublic,
     );
     return this.mapToResponse(bill);
   }
 
-  @Post('join')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Entrar na conta via código' })
-  @ApiResponse({ status: 200, description: 'Entrou na conta com sucesso' })
-  async joinBill(@Body() joinBillDto: JoinBillDto, @Request() req) {
-    const billId = await this.joinBillByCodeUseCase.execute(joinBillDto.code, req.user.userId);
-    return { billId, message: 'Entrou na conta com sucesso' };
-  }
-
   @Get()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Listar todas as contas do usuário' })
   @ApiResponse({ status: 200, description: 'Lista de contas', type: [BillSummaryDto] })
   async listUserBills(@Request() req) {
@@ -102,29 +104,31 @@ export class BillController {
       id: bill.id,
       code: bill.code,
       name: bill.name,
+      isPublic: bill.isPublic,
     }));
   }
 
   @Get(':billId')
-  @ApiOperation({ summary: 'Obter detalhes da conta' })
+  @UseGuards(JwtAuthGuard, BillAdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Obter detalhes da conta (apenas admin)' })
   @ApiParam({ name: 'billId', description: 'ID da conta' })
   @ApiResponse({ status: 200, description: 'Conta encontrada', type: BillResponseDto })
-  @UseGuards(BillParticipantGuard)
   async getBill(@Param('billId') billId: string) {
     const bill = await this.getBillUseCase.execute(billId);
     return this.mapToResponse(bill);
   }
 
   @Post(':billId/items')
+  @UseGuards(JwtAuthGuard, BillAdminGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.CREATED)
-  @UseGuards(BillParticipantGuard, CanManageItemsGuard)
   @ApiOperation({ summary: 'Adicionar item à conta' })
   @ApiParam({ name: 'billId', description: 'ID da conta' })
   @ApiResponse({ status: 201, description: 'Item adicionado com sucesso' })
   async addItem(
     @Param('billId') billId: string,
     @Body() addItemDto: AddItemDto,
-    @Request() req,
   ) {
     const item = await this.addItemToBillUseCase.execute(
       billId,
@@ -137,8 +141,9 @@ export class BillController {
   }
 
   @Delete(':billId/items/:itemId')
+  @UseGuards(JwtAuthGuard, BillAdminGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(BillParticipantGuard, CanManageItemsGuard)
   @ApiOperation({ summary: 'Remover item da conta' })
   @ApiParam({ name: 'billId', description: 'ID da conta' })
   @ApiParam({ name: 'itemId', description: 'ID do item' })
@@ -151,8 +156,9 @@ export class BillController {
   }
 
   @Post(':billId/consumptions')
+  @UseGuards(JwtAuthGuard, BillAdminGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.CREATED)
-  @UseGuards(BillParticipantGuard, CanManageItemsGuard)
   @ApiOperation({ summary: 'Adicionar consumo de item por participante' })
   @ApiParam({ name: 'billId', description: 'ID da conta' })
   @ApiResponse({ status: 201, description: 'Consumo adicionado com sucesso' })
@@ -170,8 +176,9 @@ export class BillController {
   }
 
   @Put(':billId/consumptions')
+  @UseGuards(JwtAuthGuard, BillAdminGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
-  @UseGuards(BillParticipantGuard, CanManageItemsGuard)
   @ApiOperation({ summary: 'Atualizar quantidade consumida' })
   @ApiParam({ name: 'billId', description: 'ID da conta' })
   @ApiResponse({ status: 200, description: 'Consumo atualizado com sucesso' })
@@ -189,8 +196,9 @@ export class BillController {
   }
 
   @Delete(':billId/consumptions')
+  @UseGuards(JwtAuthGuard, BillAdminGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(BillParticipantGuard, CanManageItemsGuard)
   @ApiOperation({ summary: 'Remover consumo' })
   @ApiParam({ name: 'billId', description: 'ID da conta' })
   @ApiResponse({ status: 204, description: 'Consumo removido com sucesso' })
@@ -206,8 +214,9 @@ export class BillController {
   }
 
   @Post(':billId/participants')
+  @UseGuards(JwtAuthGuard, BillAdminGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.CREATED)
-  @UseGuards(BillParticipantGuard, CanManageParticipantsGuard)
   @ApiOperation({ summary: 'Adicionar participante visitante' })
   @ApiParam({ name: 'billId', description: 'ID da conta' })
   @ApiResponse({ status: 201, description: 'Participante adicionado com sucesso' })
@@ -220,8 +229,9 @@ export class BillController {
   }
 
   @Delete(':billId/participants/:participantId')
+  @UseGuards(JwtAuthGuard, BillAdminGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(BillParticipantGuard, CanManageParticipantsGuard)
   @ApiOperation({ summary: 'Remover participante' })
   @ApiParam({ name: 'billId', description: 'ID da conta' })
   @ApiParam({ name: 'participantId', description: 'ID ou nome do participante' })
@@ -239,8 +249,9 @@ export class BillController {
   }
 
   @Post(':billId/details')
+  @UseGuards(JwtAuthGuard, BillAdminGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.CREATED)
-  @UseGuards(BillParticipantGuard, CanManageItemsGuard)
   @ApiOperation({ summary: 'Adicionar evento na linha do tempo (join/left)' })
   @ApiParam({ name: 'billId', description: 'ID da conta' })
   @ApiResponse({ status: 201, description: 'Detail adicionado com sucesso' })
@@ -259,8 +270,9 @@ export class BillController {
   }
 
   @Put(':billId/details')
+  @UseGuards(JwtAuthGuard, BillAdminGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
-  @UseGuards(BillParticipantGuard, CanManageItemsGuard)
   @ApiOperation({ summary: 'Atualizar evento na linha do tempo' })
   @ApiParam({ name: 'billId', description: 'ID da conta' })
   @ApiResponse({ status: 200, description: 'Detail atualizado com sucesso' })
@@ -279,8 +291,9 @@ export class BillController {
   }
 
   @Delete(':billId/details')
+  @UseGuards(JwtAuthGuard, BillAdminGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(BillParticipantGuard, CanManageItemsGuard)
   @ApiOperation({ summary: 'Remover detail de consumo durante ausência' })
   @ApiParam({ name: 'billId', description: 'ID da conta' })
   @ApiResponse({ status: 204, description: 'Detail removido com sucesso' })
@@ -301,6 +314,7 @@ export class BillController {
       code: bill.code,
       adminId: bill.adminId,
       name: bill.name,
+      isPublic: bill.isPublic,
       participants: bill.participants,
       items: bill.items,
       consumptions: bill.consumptions,

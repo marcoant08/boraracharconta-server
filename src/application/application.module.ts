@@ -6,8 +6,8 @@ import { LoginUseCase } from './use-cases/auth/login.use-case';
 import { VerifyEmailUseCase } from './use-cases/auth/verify-email.use-case';
 import { ResendVerificationCodeUseCase } from './use-cases/auth/resend-verification-code.use-case';
 import { CreateBillUseCase } from './use-cases/bills/create-bill.use-case';
-import { JoinBillByCodeUseCase } from './use-cases/bills/join-bill.use-case';
 import { GetBillUseCase } from './use-cases/bills/get-bill.use-case';
+import { GetBillByCodeUseCase } from './use-cases/bills/get-bill-by-code.use-case';
 import { ListUserBillsUseCase } from './use-cases/bills/list-user-bills.use-case';
 import { AddParticipantToBillUseCase } from './use-cases/bills/add-participant.use-case';
 import { RemoveParticipantFromBillUseCase } from './use-cases/bills/remove-participant.use-case';
@@ -28,8 +28,8 @@ import { RemoveBillDetailUseCase } from './use-cases/bills/remove-bill-detail.us
     VerifyEmailUseCase,
     ResendVerificationCodeUseCase,
     CreateBillUseCase,
-    JoinBillByCodeUseCase,
     GetBillUseCase,
+    GetBillByCodeUseCase,
     ListUserBillsUseCase,
     AddParticipantToBillUseCase,
     RemoveParticipantFromBillUseCase,
@@ -48,8 +48,8 @@ import { RemoveBillDetailUseCase } from './use-cases/bills/remove-bill-detail.us
     VerifyEmailUseCase,
     ResendVerificationCodeUseCase,
     CreateBillUseCase,
-    JoinBillByCodeUseCase,
     GetBillUseCase,
+    GetBillByCodeUseCase,
     ListUserBillsUseCase,
     AddParticipantToBillUseCase,
     RemoveParticipantFromBillUseCase,
