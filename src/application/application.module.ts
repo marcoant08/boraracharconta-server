@@ -19,6 +19,7 @@ import { RemoveConsumptionUseCase } from './use-cases/bills/remove-consumption.u
 import { AddBillDetailUseCase } from './use-cases/bills/add-bill-detail.use-case';
 import { UpdateBillDetailUseCase } from './use-cases/bills/update-bill-detail.use-case';
 import { RemoveBillDetailUseCase } from './use-cases/bills/remove-bill-detail.use-case';
+import { DeleteBillUseCase } from './use-cases/bills/delete-bill.use-case';
 
 @Module({
   imports: [RepositoriesModule, ServicesModule],
@@ -41,6 +42,7 @@ import { RemoveBillDetailUseCase } from './use-cases/bills/remove-bill-detail.us
     AddBillDetailUseCase,
     UpdateBillDetailUseCase,
     RemoveBillDetailUseCase,
+    DeleteBillUseCase,
   ],
   exports: [
     RegisterUserUseCase,
@@ -61,6 +63,7 @@ import { RemoveBillDetailUseCase } from './use-cases/bills/remove-bill-detail.us
     AddBillDetailUseCase,
     UpdateBillDetailUseCase,
     RemoveBillDetailUseCase,
+    DeleteBillUseCase,
   ],
 })
 export class ApplicationModule {}

@@ -34,6 +34,7 @@ import { RemoveConsumptionUseCase } from '@application/use-cases/bills/remove-co
 import { AddBillDetailUseCase } from '@application/use-cases/bills/add-bill-detail.use-case';
 import { UpdateBillDetailUseCase } from '@application/use-cases/bills/update-bill-detail.use-case';
 import { RemoveBillDetailUseCase } from '@application/use-cases/bills/remove-bill-detail.use-case';
+import { DeleteBillUseCase } from '@application/use-cases/bills/delete-bill.use-case';
 import { CreateBillDto } from '../dto/bills/create-bill.dto';
 import { AddParticipantDto } from '../dto/bills/add-participant.dto';
 import { AddItemDto } from '../dto/bills/add-item.dto';
@@ -65,6 +66,7 @@ export class BillController {
     private readonly addBillDetailUseCase: AddBillDetailUseCase,
     private readonly updateBillDetailUseCase: UpdateBillDetailUseCase,
     private readonly removeBillDetailUseCase: RemoveBillDetailUseCase,
+    private readonly deleteBillUseCase: DeleteBillUseCase,
   ) {}
 
   @Get('code/:code')
@@ -117,6 +119,17 @@ export class BillController {
   async getBill(@Param('billId') billId: string) {
     const bill = await this.getBillUseCase.execute(billId);
     return this.mapToResponse(bill);
+  }
+
+  @Delete(':billId')
+  @UseGuards(JwtAuthGuard, BillAdminGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Deletar conta (apenas admin)' })
+  @ApiParam({ name: 'billId', description: 'ID da conta' })
+  @ApiResponse({ status: 204, description: 'Conta deletada com sucesso' })
+  async deleteBill(@Param('billId') billId: string) {
+    await this.deleteBillUseCase.execute(billId);
   }
 
   @Post(':billId/items')
