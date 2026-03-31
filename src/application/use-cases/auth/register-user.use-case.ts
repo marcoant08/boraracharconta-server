@@ -20,38 +20,44 @@ export class RegisterUserUseCase {
     password: string,
     name?: string,
   ): Promise<{ message: string }> {
-    // Verificar se email já existe
     const existingUser = await this.userRepository.findByEmail(email);
-    if (existingUser) {
+
+    if (existingUser?.emailVerified) {
       throw new ConflictException('Email já está em uso');
     }
 
-    // Gerar nome do email se não fornecido
     const userName = name || email.split('@')[0];
-
-    // Hash da senha
     const hashedPassword = await this.passwordService.hashPassword(password);
-
-    // Gerar código de verificação
     const verificationCode =
       this.codeGeneratorService.generateVerificationCode();
 
-    // Criar usuário
-    const user = new User(
-      '',
-      email,
-      hashedPassword,
-      userName,
-      false,
-      verificationCode,
-      new Date(),
-      new Date(),
-    );
+    if (existingUser && !existingUser.emailVerified) {
+      const updatedUser = new User(
+        existingUser.id,
+        email,
+        hashedPassword,
+        userName,
+        false,
+        verificationCode,
+        existingUser.createdAt,
+        new Date(),
+      );
+      await this.userRepository.update(updatedUser);
+    } else {
+      const user = new User(
+        '',
+        email,
+        hashedPassword,
+        userName,
+        false,
+        verificationCode,
+        new Date(),
+        new Date(),
+      );
+      await this.userRepository.create(user);
+    }
 
-    await this.userRepository.create(user);
-
-    // // Enviar email com código
-    // await this.emailService.sendVerificationCode(email, verificationCode);
+    await this.emailService.sendVerificationCode(email, verificationCode);
 
     return { message: 'Usuário criado com sucesso. Verifique seu email.' };
   }
