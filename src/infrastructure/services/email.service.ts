@@ -18,7 +18,7 @@ export class EmailService {
         from: this.from,
         to: email,
         subject: 'Código de Verificação',
-        html: `<p>Seu código de verificação é: <strong>${code}</strong></p>`,
+        html: `<p>Seu código de verificação RACHA CONTA é: <strong>${code}</strong></p>`,
       });
     } catch (error) {
       console.error('Erro ao enviar email:', error);
