@@ -3,6 +3,8 @@ import { BillItem } from './bill-item.entity';
 import { Consumption } from './consumption.entity';
 import { BillDetail } from './bill-detail.entity';
 
+export type ServiceFeeType = 'percent' | 'fixed';
+
 export class Bill {
   id: string;
   code: string;
@@ -15,6 +17,10 @@ export class Bill {
   details: BillDetail[];
   createdAt: Date;
   updatedAt: Date;
+  serviceFeeEnabled: boolean;
+  serviceFeeType: ServiceFeeType | null;
+  serviceFeePercent: number | null;
+  serviceFeeFixedValue: number | null;
 
   constructor(
     id: string,
@@ -28,6 +34,10 @@ export class Bill {
     details: BillDetail[],
     createdAt: Date,
     updatedAt: Date,
+    serviceFeeEnabled = false,
+    serviceFeeType: ServiceFeeType | null = null,
+    serviceFeePercent: number | null = null,
+    serviceFeeFixedValue: number | null = null,
   ) {
     this.id = id;
     this.code = code;
@@ -40,6 +50,10 @@ export class Bill {
     this.details = details;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
+    this.serviceFeeEnabled = serviceFeeEnabled;
+    this.serviceFeeType = serviceFeeType;
+    this.serviceFeePercent = serviceFeePercent;
+    this.serviceFeeFixedValue = serviceFeeFixedValue;
   }
 
   isAdmin(userId: string): boolean {

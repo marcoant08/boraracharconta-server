@@ -38,4 +38,13 @@ export interface IBillRepository {
     action: 'join' | 'left',
   ): Promise<void>;
   removeBillDetail(billId: string, userId: string, itemId: string): Promise<void>;
+  updateServiceFee(
+    billId: string,
+    serviceFee: {
+      enabled: boolean;
+      type: 'percent' | 'fixed' | null;
+      percent: number | null;
+      fixedValue: number | null;
+    },
+  ): Promise<Bill>;
 }

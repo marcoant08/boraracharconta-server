@@ -32,6 +32,18 @@ export class Bill {
 
   @Prop({ type: [BillDetailSchema], default: [] })
   details: BillDetail[];
+
+  @Prop({ default: false })
+  serviceFeeEnabled: boolean;
+
+  @Prop({ type: String, enum: ['percent', 'fixed'], default: null })
+  serviceFeeType: 'percent' | 'fixed' | null;
+
+  @Prop({ type: Number, default: null })
+  serviceFeePercent: number | null;
+
+  @Prop({ type: Number, default: null })
+  serviceFeeFixedValue: number | null;
 }
 
 export const BillSchema = SchemaFactory.createForClass(Bill);

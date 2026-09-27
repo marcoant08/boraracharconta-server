@@ -35,6 +35,7 @@ import { AddBillDetailUseCase } from '@application/use-cases/bills/add-bill-deta
 import { UpdateBillDetailUseCase } from '@application/use-cases/bills/update-bill-detail.use-case';
 import { RemoveBillDetailUseCase } from '@application/use-cases/bills/remove-bill-detail.use-case';
 import { DeleteBillUseCase } from '@application/use-cases/bills/delete-bill.use-case';
+import { UpdateServiceFeeUseCase } from '@application/use-cases/bills/update-service-fee.use-case';
 import { CreateBillDto } from '../dto/bills/create-bill.dto';
 import { AddParticipantDto } from '../dto/bills/add-participant.dto';
 import { AddItemDto } from '../dto/bills/add-item.dto';
@@ -45,6 +46,7 @@ import { AddBillDetailDto } from '../dto/bills/add-bill-detail.dto';
 import { UpdateBillDetailDto } from '../dto/bills/update-bill-detail.dto';
 import { RemoveBillDetailDto } from '../dto/bills/remove-bill-detail.dto';
 import { BillResponseDto } from '../dto/bills/bill-response.dto';
+import { UpdateServiceFeeDto } from '../dto/bills/update-service-fee.dto';
 import { BillSummaryDto } from '../dto/bills/bill-summary.dto';
 import { Bill } from '@domain/entities/bill.entity';
 
@@ -67,6 +69,7 @@ export class BillController {
     private readonly updateBillDetailUseCase: UpdateBillDetailUseCase,
     private readonly removeBillDetailUseCase: RemoveBillDetailUseCase,
     private readonly deleteBillUseCase: DeleteBillUseCase,
+    private readonly updateServiceFeeUseCase: UpdateServiceFeeUseCase,
   ) {}
 
   @Get('code/:code')
@@ -130,6 +133,27 @@ export class BillController {
   @ApiResponse({ status: 204, description: 'Conta deletada com sucesso' })
   async deleteBill(@Param('billId') billId: string) {
     await this.deleteBillUseCase.execute(billId);
+  }
+
+  @Put(':billId/service-fee')
+  @UseGuards(JwtAuthGuard, BillAdminGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Configurar taxa de serviço da conta (apenas admin)' })
+  @ApiParam({ name: 'billId', description: 'ID da conta' })
+  @ApiResponse({ status: 200, description: 'Taxa de serviço atualizada', type: BillResponseDto })
+  async updateServiceFee(
+    @Param('billId') billId: string,
+    @Body() dto: UpdateServiceFeeDto,
+  ) {
+    const bill = await this.updateServiceFeeUseCase.execute(
+      billId,
+      dto.enabled,
+      dto.type,
+      dto.percent,
+      dto.fixedValue,
+    );
+    return this.mapToResponse(bill);
   }
 
   @Post(':billId/items')
@@ -332,6 +356,10 @@ export class BillController {
       items: bill.items,
       consumptions: bill.consumptions,
       details: bill.details || [],
+      serviceFeeEnabled: bill.serviceFeeEnabled ?? false,
+      serviceFeeType: bill.serviceFeeType ?? null,
+      serviceFeePercent: bill.serviceFeePercent ?? null,
+      serviceFeeFixedValue: bill.serviceFeeFixedValue ?? null,
       createdAt: bill.createdAt,
       updatedAt: bill.updatedAt,
     };

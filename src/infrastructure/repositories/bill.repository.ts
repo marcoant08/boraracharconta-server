@@ -45,6 +45,10 @@ export class BillRepository implements IBillRepository {
         quantityConsumed: d.quantityConsumed,
         action: d.action,
       })) || [],
+      serviceFeeEnabled: bill.serviceFeeEnabled ?? false,
+      serviceFeeType: bill.serviceFeeType ?? null,
+      serviceFeePercent: bill.serviceFeePercent ?? null,
+      serviceFeeFixedValue: bill.serviceFeeFixedValue ?? null,
     });
     const saved = await createdBill.save();
     return this.toDomain(saved);
@@ -98,6 +102,10 @@ export class BillRepository implements IBillRepository {
             quantityConsumed: d.quantityConsumed,
             action: d.action,
           })) || [],
+          serviceFeeEnabled: bill.serviceFeeEnabled ?? false,
+          serviceFeeType: bill.serviceFeeType ?? null,
+          serviceFeePercent: bill.serviceFeePercent ?? null,
+          serviceFeeFixedValue: bill.serviceFeeFixedValue ?? null,
         },
         { new: true },
       )
@@ -295,6 +303,32 @@ export class BillRepository implements IBillRepository {
     }).exec();
   }
 
+  async updateServiceFee(
+    billId: string,
+    serviceFee: {
+      enabled: boolean;
+      type: 'percent' | 'fixed' | null;
+      percent: number | null;
+      fixedValue: number | null;
+    },
+  ): Promise<Bill> {
+    const updated = await this.billModel
+      .findByIdAndUpdate(
+        billId,
+        {
+          $set: {
+            serviceFeeEnabled: serviceFee.enabled,
+            serviceFeeType: serviceFee.type,
+            serviceFeePercent: serviceFee.percent,
+            serviceFeeFixedValue: serviceFee.fixedValue,
+          },
+        },
+        { new: true },
+      )
+      .exec();
+    return this.toDomain(updated);
+  }
+
   private toDomain(bill: BillDoc): Bill {
     return new Bill(
       bill._id.toString(),
@@ -319,6 +353,10 @@ export class BillRepository implements IBillRepository {
       }),
       (bill as any).createdAt || new Date(),
       (bill as any).updatedAt || new Date(),
+      bill.serviceFeeEnabled ?? false,
+      bill.serviceFeeType ?? null,
+      bill.serviceFeePercent ?? null,
+      bill.serviceFeeFixedValue ?? null,
     );
   }
 }

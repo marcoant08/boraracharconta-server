@@ -82,6 +82,18 @@ export class BillResponseDto {
   details: BillDetailDto[];
 
   @ApiProperty()
+  serviceFeeEnabled: boolean;
+
+  @ApiProperty({ enum: ['percent', 'fixed'], nullable: true, required: false })
+  serviceFeeType: 'percent' | 'fixed' | null;
+
+  @ApiProperty({ nullable: true, required: false })
+  serviceFeePercent: number | null;
+
+  @ApiProperty({ nullable: true, required: false })
+  serviceFeeFixedValue: number | null;
+
+  @ApiProperty()
   createdAt: Date;
 
   @ApiProperty()
