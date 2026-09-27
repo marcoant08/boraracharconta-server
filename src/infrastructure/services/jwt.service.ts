@@ -18,17 +18,23 @@ export class JwtService {
     return this.nestJwtService.verifyAsync(token);
   }
 
-  async signOAuthState(provider: AuthProviderName): Promise<string> {
+  async signOAuthState(
+    provider: AuthProviderName,
+    returnTo: string,
+  ): Promise<string> {
     return this.nestJwtService.signAsync(
-      { purpose: 'oauth-state', provider },
+      { purpose: 'oauth-state', provider, returnTo },
       { expiresIn: '10m' },
     );
   }
 
-  async verifyOAuthState(token: string): Promise<AuthProviderName> {
+  async verifyOAuthState(
+    token: string,
+  ): Promise<{ provider: AuthProviderName; returnTo: string }> {
     const payload = await this.nestJwtService.verifyAsync<{
       purpose?: string;
       provider?: string;
+      returnTo?: string;
     }>(token);
 
     if (
@@ -38,6 +44,9 @@ export class JwtService {
       throw new Error('invalid_state');
     }
 
-    return payload.provider;
+    return {
+      provider: payload.provider,
+      returnTo: payload.returnTo || '',
+    };
   }
 }

@@ -4,12 +4,13 @@ import {
   Post,
   Body,
   Query,
+  Req,
   Res,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { LoginUseCase } from '@application/use-cases/auth/login.use-case';
 import { VerifyEmailUseCase } from '@application/use-cases/auth/verify-email.use-case';
 import { ResendVerificationCodeUseCase } from '@application/use-cases/auth/resend-verification-code.use-case';
@@ -34,8 +35,12 @@ export class AuthController {
   @Get('google')
   @ApiOperation({ summary: 'Iniciar login com Google' })
   @ApiResponse({ status: 302, description: 'Redireciona para o Google' })
-  async googleAuth(@Res() res: Response) {
-    await this.startOAuth('google', res);
+  async googleAuth(
+    @Query('returnTo') returnTo: string,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    await this.startOAuth('google', returnTo, req, res);
   }
 
   @Get('google/callback')
@@ -45,16 +50,21 @@ export class AuthController {
     @Query('code') code: string,
     @Query('state') state: string,
     @Query('error') error: string,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
-    await this.finishOAuth('google', code, state, error, res);
+    await this.finishOAuth('google', code, state, error, req, res);
   }
 
   @Get('github')
   @ApiOperation({ summary: 'Iniciar login com GitHub' })
   @ApiResponse({ status: 302, description: 'Redireciona para o GitHub' })
-  async githubAuth(@Res() res: Response) {
-    await this.startOAuth('github', res);
+  async githubAuth(
+    @Query('returnTo') returnTo: string,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    await this.startOAuth('github', returnTo, req, res);
   }
 
   @Get('github/callback')
@@ -64,9 +74,10 @@ export class AuthController {
     @Query('code') code: string,
     @Query('state') state: string,
     @Query('error') error: string,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
-    await this.finishOAuth('github', code, state, error, res);
+    await this.finishOAuth('github', code, state, error, req, res);
   }
 
   @Post('login')
@@ -100,12 +111,24 @@ export class AuthController {
     return this.resendVerificationCodeUseCase.execute(body.email);
   }
 
-  private async startOAuth(provider: AuthProviderName, res: Response) {
+  private async startOAuth(
+    provider: AuthProviderName,
+    returnTo: string,
+    req: Request,
+    res: Response,
+  ) {
+    const requestBaseUrl = this.requestBaseUrl(req);
+
     try {
-      const url = await this.oauthService.buildAuthorizationUrl(provider);
+      const url = await this.oauthService.buildAuthorizationUrl(provider, {
+        returnTo,
+        requestBaseUrl,
+      });
       res.redirect(url);
     } catch (error) {
-      res.redirect(this.oauthService.buildErrorRedirect(this.errorCode(error)));
+      res.redirect(
+        this.oauthService.buildErrorRedirect(this.errorCode(error), returnTo),
+      );
     }
   }
 
@@ -114,22 +137,51 @@ export class AuthController {
     code: string,
     state: string,
     error: string,
+    req: Request,
     res: Response,
   ) {
+    const frontendOrigin = state
+      ? await this.oauthService.readFrontendOrigin(state, provider)
+      : undefined;
+    const requestBaseUrl = this.requestBaseUrl(req);
+
     if (error || !code || !state) {
-      res.redirect(this.oauthService.buildErrorRedirect('oauth_denied'));
+      res.redirect(this.oauthService.buildErrorRedirect('oauth_denied', frontendOrigin));
       return;
     }
 
     try {
-      const profile = await this.oauthService.fetchProfile(provider, code, state);
+      const profile = await this.oauthService.fetchProfile(
+        provider,
+        code,
+        state,
+        requestBaseUrl,
+      );
       const result = await this.socialLoginUseCase.execute(profile);
-      res.redirect(this.oauthService.buildSuccessRedirect(result));
+      res.redirect(this.oauthService.buildSuccessRedirect(result, frontendOrigin));
     } catch (callbackError) {
       res.redirect(
-        this.oauthService.buildErrorRedirect(this.errorCode(callbackError)),
+        this.oauthService.buildErrorRedirect(
+          this.errorCode(callbackError),
+          frontendOrigin,
+        ),
       );
     }
+  }
+
+  private requestBaseUrl(req: Request): string {
+    const forwardedProto = this.firstHeader(req.headers['x-forwarded-proto']);
+    const proto = forwardedProto || req.protocol || 'http';
+    const host = this.firstHeader(req.headers['x-forwarded-host']) || req.get('host');
+    return `${proto}://${host}`;
+  }
+
+  private firstHeader(value: string | string[] | undefined): string {
+    if (Array.isArray(value)) {
+      return value[0] || '';
+    }
+
+    return value?.split(',')[0]?.trim() || '';
   }
 
   private errorCode(error: unknown): string {
