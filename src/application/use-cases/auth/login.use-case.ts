@@ -23,7 +23,7 @@ export class LoginUseCase {
   ): Promise<{ accessToken: string; user: { id: string; email: string; name: string } }> {
     const user = await this.userRepository.findByEmail(email);
 
-    if (!user) {
+    if (!user || !user.password) {
       throw new UnauthorizedException('Credenciais inválidas');
     }
 

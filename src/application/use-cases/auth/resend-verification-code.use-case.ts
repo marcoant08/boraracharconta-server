@@ -35,6 +35,7 @@ export class ResendVerificationCodeUseCase {
       newCode,
       user.createdAt,
       new Date(),
+      user.providers,
     );
 
     await this.userRepository.update(updatedUser);

@@ -1,9 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { User } from '@domain/entities/user.entity';
+import {
+  AuthProviderName,
+  User,
+  UserAuthProvider,
+} from '@domain/entities/user.entity';
 import { IUserRepository } from '@domain/repositories/user.repository.interface';
-import { User as UserDocument, UserDocument as UserDoc } from '../database/schemas/user.schema';
+import {
+  User as UserDocument,
+  UserDocument as UserDoc,
+} from '../database/schemas/user.schema';
 
 @Injectable()
 export class UserRepository implements IUserRepository {
@@ -14,10 +21,11 @@ export class UserRepository implements IUserRepository {
   async create(user: User): Promise<User> {
     const createdUser = new this.userModel({
       email: user.email,
-      password: user.password,
+      ...(user.password ? { password: user.password } : {}),
       name: user.name,
       emailVerified: user.emailVerified,
       emailVerificationCode: user.emailVerificationCode,
+      providers: user.providers ?? [],
     });
     const saved = await createdUser.save();
     return this.toDomain(saved);
@@ -25,6 +33,26 @@ export class UserRepository implements IUserRepository {
 
   async findByEmail(email: string): Promise<User | null> {
     const user = await this.userModel.findOne({ email }).exec();
+    return user ? this.toDomain(user) : null;
+  }
+
+  async findByEmailCaseInsensitive(email: string): Promise<User | null> {
+    const escaped = email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const user = await this.userModel
+      .findOne({ email: { $regex: new RegExp(`^${escaped}$`, 'i') } })
+      .exec();
+    return user ? this.toDomain(user) : null;
+  }
+
+  async findByProvider(
+    provider: AuthProviderName,
+    providerId: string,
+  ): Promise<User | null> {
+    const user = await this.userModel
+      .findOne({
+        providers: { $elemMatch: { provider, providerId } },
+      })
+      .exec();
     return user ? this.toDomain(user) : null;
   }
 
@@ -39,10 +67,11 @@ export class UserRepository implements IUserRepository {
         user.id,
         {
           email: user.email,
-          password: user.password,
+          ...(user.password ? { password: user.password } : {}),
           name: user.name,
           emailVerified: user.emailVerified,
           emailVerificationCode: user.emailVerificationCode,
+          providers: user.providers ?? [],
         },
         { new: true },
       )
@@ -55,15 +84,23 @@ export class UserRepository implements IUserRepository {
   }
 
   private toDomain(user: UserDoc): User {
+    const providers: UserAuthProvider[] = (user.providers || []).map(
+      (provider) => ({
+        provider: provider.provider,
+        providerId: provider.providerId,
+      }),
+    );
+
     return new User(
       user._id.toString(),
       user.email,
-      user.password,
+      user.password ?? null,
       user.name,
       user.emailVerified,
       user.emailVerificationCode,
       (user as any).createdAt || new Date(),
       (user as any).updatedAt || new Date(),
+      providers,
     );
   }
 }

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService as NestJwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { AuthProviderName } from '@domain/entities/user.entity';
 
 @Injectable()
 export class JwtService {
@@ -15,5 +16,28 @@ export class JwtService {
 
   async verify(token: string): Promise<{ sub: string; email: string }> {
     return this.nestJwtService.verifyAsync(token);
+  }
+
+  async signOAuthState(provider: AuthProviderName): Promise<string> {
+    return this.nestJwtService.signAsync(
+      { purpose: 'oauth-state', provider },
+      { expiresIn: '10m' },
+    );
+  }
+
+  async verifyOAuthState(token: string): Promise<AuthProviderName> {
+    const payload = await this.nestJwtService.verifyAsync<{
+      purpose?: string;
+      provider?: string;
+    }>(token);
+
+    if (
+      payload.purpose !== 'oauth-state' ||
+      (payload.provider !== 'google' && payload.provider !== 'github')
+    ) {
+      throw new Error('invalid_state');
+    }
+
+    return payload.provider;
   }
 }

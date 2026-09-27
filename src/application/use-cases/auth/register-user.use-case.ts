@@ -41,6 +41,7 @@ export class RegisterUserUseCase {
         verificationCode,
         existingUser.createdAt,
         new Date(),
+        existingUser.providers,
       );
       await this.userRepository.update(updatedUser);
     } else {

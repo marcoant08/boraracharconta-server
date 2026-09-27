@@ -5,6 +5,7 @@ import { RegisterUserUseCase } from './use-cases/auth/register-user.use-case';
 import { LoginUseCase } from './use-cases/auth/login.use-case';
 import { VerifyEmailUseCase } from './use-cases/auth/verify-email.use-case';
 import { ResendVerificationCodeUseCase } from './use-cases/auth/resend-verification-code.use-case';
+import { SocialLoginUseCase } from './use-cases/auth/social-login.use-case';
 import { CreateBillUseCase } from './use-cases/bills/create-bill.use-case';
 import { GetBillUseCase } from './use-cases/bills/get-bill.use-case';
 import { GetBillByCodeUseCase } from './use-cases/bills/get-bill-by-code.use-case';
@@ -29,6 +30,7 @@ import { UpdateServiceFeeUseCase } from './use-cases/bills/update-service-fee.us
     LoginUseCase,
     VerifyEmailUseCase,
     ResendVerificationCodeUseCase,
+    SocialLoginUseCase,
     CreateBillUseCase,
     GetBillUseCase,
     GetBillByCodeUseCase,
@@ -51,6 +53,7 @@ import { UpdateServiceFeeUseCase } from './use-cases/bills/update-service-fee.us
     LoginUseCase,
     VerifyEmailUseCase,
     ResendVerificationCodeUseCase,
+    SocialLoginUseCase,
     CreateBillUseCase,
     GetBillUseCase,
     GetBillByCodeUseCase,

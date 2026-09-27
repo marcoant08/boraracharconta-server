@@ -33,6 +33,7 @@ export class VerifyEmailUseCase {
       user.emailVerificationCode,
       user.createdAt,
       new Date(),
+      user.providers,
     );
 
     await this.userRepository.update(updatedUser);

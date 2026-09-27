@@ -5,6 +5,7 @@ import { PasswordService } from './password.service';
 import { JwtService } from './jwt.service';
 import { CodeGeneratorService } from './code-generator.service';
 import { EmailService } from './email.service';
+import { OAuthService } from './oauth.service';
 
 @Module({
   imports: [
@@ -25,7 +26,14 @@ import { EmailService } from './email.service';
     JwtService,
     CodeGeneratorService,
     EmailService,
+    OAuthService,
   ],
-  exports: [PasswordService, JwtService, CodeGeneratorService, EmailService],
+  exports: [
+    PasswordService,
+    JwtService,
+    CodeGeneratorService,
+    EmailService,
+    OAuthService,
+  ],
 })
 export class ServicesModule {}
