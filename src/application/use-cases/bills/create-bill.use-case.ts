@@ -22,11 +22,10 @@ export class CreateBillUseCase {
       throw new NotFoundException('Usuário não encontrado');
     }
 
-    // Criar participante com o usuário criador
     const adminParticipant = new Participant(
       adminId,
       user.name,
-      false, // não é visitante
+      false,
       new Date(),
     );
 
